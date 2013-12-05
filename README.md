@@ -21,7 +21,15 @@ GeoHex implementation in Go
 You need to install Ginkgo & Gomega to run tests. Please see
 http://onsi.github.io/ginkgo/ for more details.
 
-    $ go test
+    $ make testdeps
+
+To run tests, call:
+
+    $ make test
+
+To run benchmarks, call:
+
+    $ make benchmark
 
 ## Licence
 
