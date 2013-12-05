@@ -1,5 +1,7 @@
 # GeoHex
 
+[![Build Status](https://travis-ci.org/bsm/geohex.go.png)](https://travis-ci.org/bsm/geohex.go)
+
 GeoHex implementation in Go
 
 ## Quick Start
