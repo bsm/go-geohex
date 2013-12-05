@@ -1,0 +1,6 @@
+language: go
+install: make testdeps
+go:
+  - 1.1
+  - tip
+
