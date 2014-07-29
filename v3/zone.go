@@ -48,33 +48,29 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 	for i := 0; i < level+3; i++ {
 		pow := math.Pow(3, float64(level+2-i))
 		p2c := math.Ceil(pow / 2)
-		c3b := []byte{'1', '1'}
+		c3x, c3y := 1, 1
 
 		if x >= p2c {
 			x -= pow
-			c3b[0] = '2'
+			c3x = 2
 		} else if x <= -p2c {
 			x += pow
-			c3b[0] = '0'
+			c3x = 0
 		}
 
 		if y >= p2c {
 			y -= pow
-			c3b[1] = '2'
+			c3y = 2
 		} else if y <= -p2c {
 			y += pow
-			c3b[1] = '0'
+			c3y = 0
 		}
 
-		var num int64
-		if num, err = strconv.ParseInt(string(c3b), 3, 32); err != nil {
-			return
-		}
-
+		num := c3x*3 + c3y
 		if i < 3 {
-			base += int(math.Pow(10, float64(2-i))) * int(num)
+			base += int(math.Pow(10, float64(2-i))) * num
 		} else {
-			code[i-1] = strconv.FormatInt(num, 10)[0]
+			code[i-1] = strconv.Itoa(num)[0]
 		}
 	}
 
