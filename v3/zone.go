@@ -72,16 +72,19 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 		}
 
 		num := c3x*3 + c3y
-		if i < 3 {
-			base += int(math.Pow(10, float64(2-i))) * num
+		if i == 0 {
+			base += 100 * num
+		} else if i == 1 {
+			base += 10 * num
+		} else if i == 2 {
+			base += num
 		} else {
 			code[i-1] = '0' + byte(num)
 		}
 	}
 
-	basef := float64(base)
-	code[0] = hChars[int(math.Floor(basef/30))]
-	code[1] = hChars[int(math.Floor(math.Mod(basef, 30)))]
+	code[0] = hChars[base/30]
+	code[1] = hChars[base%30]
 
 	return &Zone{Code: string(code), Pos: pos}, nil
 }
