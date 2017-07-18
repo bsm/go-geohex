@@ -105,13 +105,14 @@ func Decode(code string) (_ *LL, err error) {
 		return nil, ErrCodeInvalid
 	}
 
-	pos := &Position{z: zoom}
 	base := n1*30 + n2
 	if base < 100 {
 		code = "0" + strconv.Itoa(base) + code[2:]
 	} else {
 		code = strconv.Itoa(base) + code[2:]
 	}
+
+	pos := &Position{z: zoom}
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
