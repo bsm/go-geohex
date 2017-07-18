@@ -3,6 +3,7 @@ package geohex
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 // Error types
@@ -105,7 +106,12 @@ func Decode(code string) (_ *LL, err error) {
 	}
 
 	pos := &Position{z: zoom}
-	code = fmt.Sprintf("%03d", n1*30+n2) + code[2:]
+	base := n1*30 + n2
+	if base < 100 {
+		code = "0" + strconv.Itoa(base) + code[2:]
+	} else {
+		code = strconv.Itoa(base) + code[2:]
+	}
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
