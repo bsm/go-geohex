@@ -35,5 +35,5 @@ To run benchmarks, call:
 
 ## Latest benchmarks
 
-    BenchmarkEncode-4        5000000           387 ns/op         109 B/op          5 allocs/op
+    BenchmarkEncode-4        5000000           342 ns/op         109 B/op          5 allocs/op
     BenchmarkDecode-4        5000000           302 ns/op          19 B/op          2 allocs/op

@@ -20,8 +20,9 @@ type Zone struct {
 
 var (
 	// Precalculated math stuff
-	pow3f [MaxLevel + 3]float64
-	pow3i [MaxLevel + 3]int
+	pow3f         [MaxLevel + 3]float64
+	pow3i         [MaxLevel + 3]int
+	halfCeilPow3f [MaxLevel + 3]float64
 )
 
 // String returns the zone code
@@ -49,38 +50,40 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 	if hBase-cnt.E < zoom.size {
 		x, y = y, x
 	}
-	base, code := 0, make([]byte, level+2)
+	base, num, code := 0, 0, make([]byte, level+2)
 
 	for i := 0; i < level+3; i++ {
 		pow := pow3f[level+2-i]
-		p2c := math.Ceil(pow / 2)
-		c3x, c3y := 1, 1
+		p2c := halfCeilPow3f[level+2-i]
 
 		if x >= p2c {
 			x -= pow
-			c3x = 2
+			num = 6
 		} else if x <= -p2c {
 			x += pow
-			c3x = 0
+			num = 0
+		} else {
+			num = 3
 		}
 
 		if y >= p2c {
 			y -= pow
-			c3y = 2
+			num += 2
 		} else if y <= -p2c {
 			y += pow
-			c3y = 0
+			// num += 0
+		} else {
+			num += 1
 		}
 
-		num := c3x*3 + c3y
-		if i == 0 {
-			base += 100 * num
-		} else if i == 1 {
-			base += 10 * num
+		if i >= 3 {
+			code[i-1] = '0' + byte(num)
 		} else if i == 2 {
 			base += num
+		} else if i == 1 {
+			base += 10 * num
 		} else {
-			code[i-1] = '0' + byte(num)
+			base += 100 * num
 		}
 	}
 
@@ -143,6 +146,7 @@ func Decode(code string) (_ *LL, err error) {
 func init() {
 	for i := 0; i < MaxLevel+3; i++ {
 		pow3f[i] = math.Pow(3, float64(i))
+		halfCeilPow3f[i] = pow3f[i] / 2
 		pow3i[i] = int(math.Pow(3, float64(i)))
 	}
 }
