@@ -17,6 +17,12 @@ type Zone struct {
 	Pos  *Position
 }
 
+var (
+	// Precalculated math stuff
+	pow3f [MaxLevel + 3]float64
+	pow3i [MaxLevel + 3]int
+)
+
 // String returns the zone code
 func (z *Zone) String() string {
 	return z.Code
@@ -45,7 +51,7 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 	base, code := 0, make([]byte, level+2)
 
 	for i := 0; i < level+3; i++ {
-		pow := math.Pow(3, float64(level+2-i))
+		pow := pow3f[level+2-i]
 		p2c := math.Ceil(pow / 2)
 		c3x, c3y := 1, 1
 
@@ -104,7 +110,7 @@ func Decode(code string) (_ *LL, err error) {
 			return
 		}
 
-		pow := int(math.Pow(3, float64(lnc-i)))
+		pow := pow3i[lnc-i]
 		c3x := n / 3
 		c3y := n % 3
 		switch c3x {
@@ -122,4 +128,11 @@ func Decode(code string) (_ *LL, err error) {
 	}
 
 	return pos.LL(), nil
+}
+
+func init() {
+	for i := 0; i < MaxLevel+3; i++ {
+		pow3f[i] = math.Pow(3, float64(i))
+		pow3i[i] = int(math.Pow(3, float64(i)))
+	}
 }

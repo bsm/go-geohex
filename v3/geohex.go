@@ -6,6 +6,9 @@ import (
 
 const VERSION = "3.0.0"
 
+// MaxLevel is the maximum encoding level that this implementation supports
+const MaxLevel = 20
+
 var (
 	hChars = []byte{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
 	hIndex = make(map[byte]int, len(hChars))
@@ -55,7 +58,7 @@ func (ll *LL) Point() *Point {
 
 // Init zooms
 func init() {
-	for level := 0; level < 21; level++ {
+	for level := 0; level <= MaxLevel; level++ {
 		size := hBase / math.Pow(3, float64(level+3))
 		zooms[level] = &Zoom{level: level, size: size, scale: size / hEr, w: 6 * size, h: 6 * size * hK}
 	}
