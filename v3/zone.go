@@ -3,7 +3,6 @@ package geohex
 import (
 	"fmt"
 	"math"
-	"strconv"
 )
 
 // Error types
@@ -70,7 +69,7 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 		if i < 3 {
 			base += int(math.Pow(10, float64(2-i))) * num
 		} else {
-			code[i-1] = strconv.Itoa(num)[0]
+			code[i-1] = '0' + byte(num)
 		}
 	}
 
@@ -99,23 +98,25 @@ func Decode(code string) (_ *LL, err error) {
 	pos := &Position{z: zoom}
 	code = fmt.Sprintf("%03d", n1*30+n2) + code[2:]
 	for i, digit := range code {
-		var n int64
-		if n, err = strconv.ParseInt(string(digit), 10, 32); err != nil {
+		n := int64(digit - '0')
+		if n < 0 || n > 9 {
+			err = fmt.Errorf("expected a digit, got '%s'", digit)
 			return
 		}
 
 		pow := int(math.Pow(3, float64(lnc-i)))
-		sb2 := fmt.Sprintf("%02s\n", strconv.FormatInt(n, 3))
-		switch sb2[0] {
-		case '0':
+		c3x := n / 3
+		c3y := n % 3
+		switch c3x {
+		case 0:
 			pos.X -= pow
-		case '2':
+		case 2:
 			pos.X += pow
 		}
-		switch sb2[1] {
-		case '0':
+		switch c3y {
+		case 0:
 			pos.Y -= pow
-		case '2':
+		case 2:
 			pos.Y += pow
 		}
 	}
