@@ -3,27 +3,73 @@ package geohex
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"math/rand"
 	"testing"
 )
+
+const testItems = 30
+
+var (
+	randomGenerator = rand.New(rand.NewSource(0))
+	points          [testItems][2]float64
+	geohex2         [testItems]string
+	geohex6         [testItems]string
+	geohex15        [testItems]string
+)
+
+func init() {
+	for i := 0; i < testItems; i++ {
+		points[i] = [2]float64{randomGenerator.Float64()*180 - 90, randomGenerator.Float64()*360 - 180}
+		zone2, _ := Encode(points[i][0], points[i][1], 2)
+		geohex2[i] = zone2.String()
+		zone6, _ := Encode(points[i][0], points[i][1], 6)
+		geohex6[i] = zone6.String()
+		zone15, _ := Encode(points[i][0], points[i][1], 15)
+		geohex15[i] = zone15.String()
+	}
+}
 
 func TestSuite(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "geohex")
 }
 
-func BenchmarkEncode(b *testing.B) {
-	for i := 0; i < b.N; i += 3 {
-		Encode(7.092954137951794, 179.9073230957031, 2)
-		Encode(-21.616579336740593, -166.9921875, 6)
-		Encode(82.07002819448266, -177.890625, 15)
+func BenchmarkEncodeLevel2(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		p := points[i%testItems]
+		Encode(p[0], p[1], 2)
 	}
 }
 
-func BenchmarkDecode(b *testing.B) {
-	for i := 0; i < b.N; i += 3 {
-		Decode("QU08")
-		Decode("GH501658")
-		Decode("TK720137660817775")
+func BenchmarkEncodeLevel6(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		p := points[i%testItems]
+		Encode(p[0], p[1], 6)
+	}
+}
+
+func BenchmarkEncodeLevel15(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		p := points[i%testItems]
+		Encode(p[0], p[1], 15)
+	}
+}
+
+func BenchmarkDecodeLevel2(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		Decode(geohex2[i%testItems])
+	}
+}
+
+func BenchmarkDecodeLevel6(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		Decode(geohex6[i%testItems])
+	}
+}
+
+func BenchmarkDecodeLevel15(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		Decode(geohex15[i%testItems])
 	}
 }
 
