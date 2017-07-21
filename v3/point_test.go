@@ -26,8 +26,8 @@ var _ = Describe("Point to position", func() {
 		tc := tc
 		It("should create position from "+tc.ll.String(), func() {
 			pos := tc.ll.Point().Position(zooms[tc.level])
-			tc.expectedPosition.z = zooms[tc.level]
-			Expect(*pos).To(Equal(tc.expectedPosition))
+			Expect(pos.X).To(Equal(tc.expectedX))
+			Expect(pos.Y).To(Equal(tc.expectedY))
 		})
 	}
 })

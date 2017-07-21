@@ -53,9 +53,10 @@ func loadLL2CodeTestCases() []ll2codeTestCase {
 }
 
 type ll2PositionTestCase struct {
-	level            int
-	ll               LL
-	expectedPosition Position
+	level     int
+	ll        LL
+	expectedX int
+	expectedY int
 }
 
 func loadLL2PositionTestCases() []ll2PositionTestCase {
@@ -67,8 +68,8 @@ func loadLL2PositionTestCases() []ll2PositionTestCase {
 			{raw[0], &tc.level},
 			{raw[1], &tc.ll.Lat},
 			{raw[2], &tc.ll.Lon},
-			{raw[3], &tc.expectedPosition.X},
-			{raw[4], &tc.expectedPosition.Y},
+			{raw[3], &tc.expectedX},
+			{raw[4], &tc.expectedY},
 		})
 		tcs = append(tcs, tc)
 		return err
@@ -99,7 +100,8 @@ func loadCode2PositionTestCases() []code2PositionTestCase {
 
 type position2hexTestCase struct {
 	level        int
-	position     Position
+	x            int
+	y            int
 	expectedCode string
 }
 
@@ -110,8 +112,8 @@ func loadPosition2HexTestCases() []position2hexTestCase {
 		tc := position2hexTestCase{}
 		err := unmarshalRawFields([]tcFieldMapping{
 			{raw[0], &tc.level},
-			{raw[1], &tc.position.X},
-			{raw[2], &tc.position.Y},
+			{raw[1], &tc.x},
+			{raw[2], &tc.y},
 			{raw[3], &tc.expectedCode},
 		})
 		tcs = append(tcs, tc)

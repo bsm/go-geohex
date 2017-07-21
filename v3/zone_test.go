@@ -1,6 +1,7 @@
 package geohex
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -47,12 +48,12 @@ var _ = Describe("Decode Position from Code", func() {
 
 	for _, tc := range loadCode2PositionTestCases() {
 		tc := &tc
-		It("should decode position "+tc.expectedPosition.String()+" from "+tc.code, func() {
-			act, err := DecodeZone(tc.code)
+		It(fmt.Sprintf("should decode position [%d, %d] from %s", tc.expectedPosition.X, tc.expectedPosition.Y, tc.code), func() {
+			act, err := DecodePosition(tc.code)
 			Expect(err).To(BeNil())
 
-			Expect(act.Pos.X).To(Equal(tc.expectedPosition.X))
-			Expect(act.Pos.Y).To(Equal(tc.expectedPosition.Y))
+			Expect(act.X).To(Equal(tc.expectedPosition.X))
+			Expect(act.Y).To(Equal(tc.expectedPosition.Y))
 		})
 	}
 
