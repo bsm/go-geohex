@@ -24,5 +24,11 @@ func (p *Point) Position(z *Zoom) *Position {
 		pos.X, pos.Y = int(math.Floor(x+0.499999)), int(math.Floor(y+0.499999))
 	}
 
+	// Not really efficient to do here, or at least should be cached
+	cnt := pos.Centroid()
+	if hBase-cnt.E < z.size {
+		pos.X, pos.Y = pos.Y, pos.X
+	}
+
 	return &pos
 }

@@ -44,12 +44,8 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 
 	pnt := NewLL(lat, lon).Point() // Point at lat/lon
 	pos := pnt.Position(zoom)      // Tile position
-	cnt := pos.Centroid()          // Centroid of pos
 
 	x, y := float64(pos.X), float64(pos.Y)
-	if hBase-cnt.E < zoom.size {
-		x, y = y, x
-	}
 	base, num, code := 0, 0, make([]byte, level+2)
 
 	for i := 0; i < level+3; i++ {
