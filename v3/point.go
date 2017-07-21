@@ -28,7 +28,7 @@ func (p *Point) Position(z *Zoom) *Position {
 
 	// Not really efficient to do here, or at least should be cached
 	cnt := pos.Centroid()
-	if hBase-cnt.E < z.size {
+	if hBase-cnt.E <= z.size/2 {
 		pos.X, pos.Y = pos.Y, pos.X
 	}
 
