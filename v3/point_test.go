@@ -32,3 +32,14 @@ var _ = Describe("Point", func() {
 		Expect(pos.z.level).To(Equal(0))
 	})
 })
+
+var _ = Describe("Point to position", func() {
+	for _, tc := range loadLL2PositionTestCases() {
+		tc := tc
+		It("should create position from "+tc.ll.String(), func() {
+			pos := tc.ll.Point().Position(zooms[tc.level])
+			tc.expectedPosition.z = zooms[tc.level]
+			Expect(*pos).To(Equal(tc.expectedPosition))
+		})
+	}
+})

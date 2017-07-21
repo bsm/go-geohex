@@ -33,29 +33,6 @@ type Zoom struct {
 // Cached zooms lookup
 var zooms = make(map[int]*Zoom, 20)
 
-// LL is a lat/lon tuple
-type LL struct {
-	Lat, Lon float64
-}
-
-// NewLL creates a new normalised LL
-func NewLL(lat, lon float64) *LL {
-	if lon < -180 {
-		lon += 360
-	} else if lon > 180 {
-		lon -= 360
-	}
-	return &LL{Lat: lat, Lon: lon}
-}
-
-// Point generates a grid point from a lat/lon
-func (ll *LL) Point() *Point {
-	e := ll.Lon * hBase / 180.0
-	n := math.Log(math.Tan((90+ll.Lat)*hD2R/2)) / math.Pi * hBase
-
-	return &Point{E: e, N: n}
-}
-
 // Init zooms
 func init() {
 	for level := 0; level <= MaxLevel; level++ {
