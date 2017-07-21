@@ -8,7 +8,7 @@ type Position struct {
 	z    *Zoom
 }
 
-// Centroid returns the centroidpoint of the tile
+// Centroid returns the centroid point of the tile
 func (p *Position) Centroid() *Point {
 	x := float64(p.X)
 	y := float64(p.Y)

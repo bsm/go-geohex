@@ -11,7 +11,7 @@ var _ = Describe("Encode", func() {
 
 	for _, tc := range loadLL2HexTestCases() {
 		tc := tc
-		It("should encode to "+tc.expectedCode, func() {
+		It("should encode "+tc.ll.String()+" to "+tc.expectedCode, func() {
 			zone, err = Encode(tc.ll.Lat, tc.ll.Lon, tc.level)
 			Expect(err).To(BeNil())
 			Expect(zone.Code).To(Equal(tc.expectedCode))
@@ -32,7 +32,7 @@ var _ = Describe("Decode", func() {
 
 	for _, tc := range loadCode2HexTestCases() {
 		tc := tc
-		It("should decode Lat/Lon from "+tc.code, func() {
+		It("should decode "+tc.expectedLL.String()+" from "+tc.code, func() {
 			act, err := Decode(tc.code)
 			Expect(err).To(BeNil())
 
