@@ -18,10 +18,12 @@ func (p *Point) Position(z *Zoom) *Position {
 	pos := Position{z: z}
 	if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
 		pos.X, pos.Y = int(x0)+1, int(y0)+1
-	} else if yd < -xd+1 && yd > 2*xd-1 && yd < 0.5*xd+0.5 {
+	} else if yd <= -xd+1 && yd > 2*xd-1 && yd < 0.5*xd+0.5 {
 		pos.X, pos.Y = int(x0), int(y0)
+	} else if yd > xd {
+		pos.X, pos.Y = int(x0), int(y0)+1
 	} else {
-		pos.X, pos.Y = int(math.Floor(x+0.499999)), int(math.Floor(y+0.499999))
+		pos.X, pos.Y = int(x0)+1, int(y0)
 	}
 
 	// Not really efficient to do here, or at least should be cached
