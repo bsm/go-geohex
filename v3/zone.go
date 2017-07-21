@@ -89,8 +89,18 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 	return &Zone{Code: string(code), Pos: pos}, nil
 }
 
-// Decode decodes a string code into Point
-func Decode(code string) (_ *LL, err error) {
+// Decode decodes a string code into Lat/Lon coordinates
+func Decode(code string) (*LL, error) {
+	z, err := DecodeZone(code)
+	if err != nil {
+		return nil, err
+	}
+	return z.Pos.LL(), nil
+}
+
+// DecodeZone decodes a string code into a Zone,
+// useful for further operations without having to decode it into a Lat/Lon, like calculating neighbours
+func DecodeZone(code string) (*Zone, error) {
 	lnc := len(code)
 	zoom, ok := zooms[lnc-2]
 	if !ok {
@@ -115,8 +125,7 @@ func Decode(code string) (_ *LL, err error) {
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
-			err = fmt.Errorf("expected a digit, got '%s'", digit)
-			return
+			return nil, fmt.Errorf("expected a digit, got '%b'", digit)
 		}
 
 		pow := pow3i[lnc-i]
@@ -135,8 +144,8 @@ func Decode(code string) (_ *LL, err error) {
 			pos.Y += pow
 		}
 	}
+	return &Zone{Code: code, Pos: pos}, nil
 
-	return pos.LL(), nil
 }
 
 func init() {

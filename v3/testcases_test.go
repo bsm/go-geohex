@@ -8,16 +8,16 @@ import (
 
 // Test cases downloaded from http://geohex.net/testcase/v3.2.html
 
-type code2HexTestCase struct {
+type code2LLTestCase struct {
 	code       string
 	expectedLL LL
 }
 
-func loadCode2HexTestCases() []code2HexTestCase {
-	var tcs []code2HexTestCase
+func loadCode2LLTestCases() []code2LLTestCase {
+	var tcs []code2LLTestCase
 	// http://geohex.net/testcase/hex_v3.2_test_code2HEX.json
 	loadTestCasesFromJson("hex_v3.2_test_code2HEX.json", func(raw []json.RawMessage) error {
-		tc := code2HexTestCase{}
+		tc := code2LLTestCase{}
 		err := unmarshalRawFields([]tcFieldMapping{
 			{raw[0], &tc.code},
 			{raw[1], &tc.expectedLL.Lat},
@@ -29,17 +29,17 @@ func loadCode2HexTestCases() []code2HexTestCase {
 	return tcs
 }
 
-type ll2hexTestCase struct {
+type ll2codeTestCase struct {
 	level        int
 	ll           LL
 	expectedCode string
 }
 
-func loadLL2HexTestCases() []ll2hexTestCase {
-	var tcs []ll2hexTestCase
+func loadLL2CodeTestCases() []ll2codeTestCase {
+	var tcs []ll2codeTestCase
 	// http://geohex.net/testcase/hex_v3.2_test_coord2HEX.json
 	loadTestCasesFromJson("hex_v3.2_test_coord2HEX.json", func(raw []json.RawMessage) error {
-		tc := ll2hexTestCase{}
+		tc := ll2codeTestCase{}
 		err := unmarshalRawFields([]tcFieldMapping{
 			{raw[0], &tc.level},
 			{raw[1], &tc.ll.Lat},

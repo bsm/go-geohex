@@ -1,6 +1,9 @@
 package geohex
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // Position implements a grid tile position
 type Position struct {
@@ -30,4 +33,8 @@ func (p *Position) LL() *LL {
 	}
 
 	return NewLL(lat, lon)
+}
+
+func (p *Position) String() string {
+	return fmt.Sprintf("[%d, %d]", p.X, p.Y)
 }

@@ -5,11 +5,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Encode", func() {
+var _ = Describe("Encode Code from LatLon", func() {
 	var zone *Zone
 	var err error
 
-	for _, tc := range loadLL2HexTestCases() {
+	for _, tc := range loadLL2CodeTestCases() {
 		tc := tc
 		It("should encode "+tc.ll.String()+" to "+tc.expectedCode, func() {
 			zone, err = Encode(tc.ll.Lat, tc.ll.Lon, tc.level)
@@ -28,16 +28,31 @@ var _ = Describe("Encode", func() {
 
 })
 
-var _ = Describe("Decode", func() {
+var _ = Describe("Decode LatLon from Code", func() {
 
-	for _, tc := range loadCode2HexTestCases() {
+	for _, tc := range loadCode2LLTestCases() {
 		tc := tc
-		It("should decode "+tc.expectedLL.String()+" from "+tc.code, func() {
+		It("should decode latlon "+tc.expectedLL.String()+" from "+tc.code, func() {
 			act, err := Decode(tc.code)
 			Expect(err).To(BeNil())
 
 			Expect(act.Lat).To(BeNumerically("~", tc.expectedLL.Lat))
 			Expect(act.Lon).To(BeNumerically("~", tc.expectedLL.Lon))
+		})
+	}
+
+})
+
+var _ = Describe("Decode Position from Code", func() {
+
+	for _, tc := range loadCode2PositionTestCases() {
+		tc := &tc
+		It("should decode position "+tc.expectedPosition.String()+" from "+tc.code, func() {
+			act, err := DecodeZone(tc.code)
+			Expect(err).To(BeNil())
+
+			Expect(act.Pos.X).To(Equal(tc.expectedPosition.X))
+			Expect(act.Pos.Y).To(Equal(tc.expectedPosition.Y))
 		})
 	}
 
