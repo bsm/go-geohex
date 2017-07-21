@@ -19,18 +19,6 @@ var _ = Describe("Point", func() {
 		Expect(p2.E).To(BeNumerically("~", 19244476.4, 0.1))
 		Expect(p2.N).To(BeNumerically("~", 17189491.4, 0.1))
 	})
-
-	It("should export grid positions", func() {
-		pos := p1.Position(zooms[0])
-		Expect(pos.X).To(Equal(4))
-		Expect(pos.Y).To(Equal(-5))
-		Expect(pos.z.level).To(Equal(0))
-
-		pos = p2.Position(zooms[0])
-		Expect(pos.X).To(Equal(11))
-		Expect(pos.Y).To(Equal(2))
-		Expect(pos.z.level).To(Equal(0))
-	})
 })
 
 var _ = Describe("Point to position", func() {
