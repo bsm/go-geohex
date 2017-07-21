@@ -20,9 +20,8 @@ type Zone struct {
 
 var (
 	// Precalculated math stuff
-	pow3f         [MaxLevel + 3]float64
-	pow3i         [MaxLevel + 3]int
-	halfCeilPow3f [MaxLevel + 3]float64
+	pow3     [MaxLevel + 3]int
+	halfPow3 [MaxLevel + 3]int
 )
 
 // String returns the zone code
@@ -87,7 +86,7 @@ func DecodePosition(code string) (*Position, error) {
 			return nil, fmt.Errorf("expected a digit, got '%b'", digit)
 		}
 
-		pow := pow3i[lnc-i]
+		pow := pow3[lnc-i]
 		c3x := n / 3
 		c3y := n % 3
 		switch c3x {
@@ -109,8 +108,8 @@ func DecodePosition(code string) (*Position, error) {
 
 func init() {
 	for i := 0; i < MaxLevel+3; i++ {
-		pow3f[i] = math.Pow(3, float64(i))
-		halfCeilPow3f[i] = pow3f[i] / 2
-		pow3i[i] = int(math.Pow(3, float64(i)))
+		pow := math.Pow(3, float64(i))
+		pow3[i] = int(pow)
+		halfPow3[i] = int(math.Ceil(pow / 2))
 	}
 }

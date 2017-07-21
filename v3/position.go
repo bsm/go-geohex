@@ -43,14 +43,14 @@ func (p *Position) Code() string {
 		return p.code
 	}
 
-	x, y := float64(p.X), float64(p.Y)
+	x, y := p.X, p.Y
 	bx, by, base := make([]int, 3), make([]int, 3), 0
 	c3x, c3y := 0, 0
 	code := make([]byte, p.z.level+2)
 
 	for i := 0; i < p.z.level+3; i++ {
-		pow := pow3f[p.z.level+2-i]
-		p2c := halfCeilPow3f[p.z.level+2-i]
+		pow := pow3[p.z.level+2-i]
+		p2c := halfPow3[p.z.level+2-i]
 
 		if x >= p2c {
 			x -= pow
@@ -81,7 +81,7 @@ func (p *Position) Code() string {
 	}
 
 	ll := p.LL()
-	// Magic time. Unoptimized so far.1
+	// Magic time. Unoptimized so far.
 	if ll.Lon == -180 || ll.Lon >= 0 {
 		if bx[1] == by[1] && bx[2] == by[2] {
 			if bx[0] == 2 && by[0] == 1 {
