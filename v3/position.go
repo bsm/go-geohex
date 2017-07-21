@@ -44,7 +44,9 @@ func (p *Position) Code() string {
 	}
 
 	x, y := float64(p.X), float64(p.Y)
-	base, num, code := 0, 0, make([]byte, p.z.level+2)
+	bx, by, base := make([]int, 3), make([]int, 3), 0
+	c3x, c3y := 0, 0
+	code := make([]byte, p.z.level+2)
 
 	for i := 0; i < p.z.level+3; i++ {
 		pow := pow3f[p.z.level+2-i]
@@ -52,34 +54,45 @@ func (p *Position) Code() string {
 
 		if x >= p2c {
 			x -= pow
-			num = 6
+			c3x = 2
 		} else if x <= -p2c {
 			x += pow
-			num = 0
+			c3x = 0
 		} else {
-			num = 3
+			c3x = 1
 		}
 
 		if y >= p2c {
 			y -= pow
-			num += 2
+			c3y = 2
 		} else if y <= -p2c {
 			y += pow
-			// num += 0
+			c3y = 0
 		} else {
-			num += 1
+			c3y = 1
 		}
 
 		if i >= 3 {
-			code[i-1] = '0' + byte(num)
-		} else if i == 2 {
-			base += num
-		} else if i == 1 {
-			base += 10 * num
+			code[i-1] = '0' + byte(3*c3x+c3y)
 		} else {
-			base += 100 * num
+			bx[i] = c3x
+			by[i] = c3y
 		}
 	}
+
+	ll := p.LL()
+	// Magic time. Unoptimized so far.1
+	if ll.Lon == -180 || ll.Lon >= 0 {
+		if bx[1] == by[1] && bx[2] == by[2] {
+			if bx[0] == 2 && by[0] == 1 {
+				bx[0], by[0] = 1, 2
+			} else if bx[0] == 1 && by[0] == 0 {
+				bx[0], by[0] = 0, 1
+			}
+		}
+	}
+
+	base = 3*(100*bx[0]+10*bx[1]+bx[2]) + (100*by[0] + 10*by[1] + by[2])
 
 	code[0] = hChars[base/30]
 	code[1] = hChars[base%30]
@@ -95,5 +108,5 @@ func (p *Position) String() string {
 	if p.z != nil {
 		level = p.z.level
 	}
-	return fmt.Sprintf("[%d, %d]@d", p.X, p.Y, level)
+	return fmt.Sprintf("[%d, %d]@%d", p.X, p.Y, level)
 }
