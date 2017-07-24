@@ -48,10 +48,10 @@ func Encode(lat, lon float64, level int) (_ *Zone, err error) {
 }
 
 // Decode decodes a string code into Lat/Lon coordinates
-func Decode(code string) (*LL, error) {
+func Decode(code string) (LL, error) {
 	pos, err := DecodePosition(code)
 	if err != nil {
-		return nil, err
+		return LL{}, err
 	}
 	return pos.LL(), nil
 }
@@ -79,7 +79,7 @@ func DecodePosition(code string) (*Position, error) {
 		code = strconv.Itoa(base) + code[2:]
 	}
 
-	pos := &Position{z: zoom, code: code}
+	pos := &Position{z: zoom}
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {

@@ -9,21 +9,19 @@ import (
 type Position struct {
 	X, Y int
 	z    *Zoom
-
-	code string
 }
 
 // Centroid returns the centroid point of the tile
-func (p *Position) Centroid() *Point {
+func (p *Position) Centroid() Point {
 	x := float64(p.X)
 	y := float64(p.Y)
 	n := (hK*x*p.z.w + y*p.z.h) / 2
 	e := (n - y*p.z.h) / hK
-	return &Point{E: e, N: n}
+	return Point{E: e, N: n}
 }
 
 // LL converts the position into a LL
-func (p *Position) LL() *LL {
+func (p *Position) LL() LL {
 	c := p.Centroid()
 	lat := 180 / math.Pi * (2*math.Atan(math.Exp(c.N/hBase*180*hD2R)) - math.Pi/2)
 
@@ -39,10 +37,6 @@ func (p *Position) LL() *LL {
 
 // Code returns string Code of this position
 func (p *Position) Code() string {
-	if p.code != "" {
-		return p.code
-	}
-
 	x, y := p.X, p.Y
 	bx, by, base := make([]int, 3), make([]int, 3), 0
 	c3x, c3y := 0, 0
@@ -97,9 +91,7 @@ func (p *Position) Code() string {
 	code[0] = hChars[base/30]
 	code[1] = hChars[base%30]
 
-	p.code = string(code)
-
-	return p.code
+	return string(code)
 }
 
 // String returns a String representation of this position (without taking in account zoom level)

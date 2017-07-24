@@ -11,24 +11,24 @@ type LL struct {
 }
 
 // NewLL creates a new normalised LL
-func NewLL(lat, lon float64) *LL {
+func NewLL(lat, lon float64) LL {
 	if lon < -180 {
 		lon += 360
 	} else if lon > 180 {
 		lon -= 360
 	}
-	return &LL{Lat: lat, Lon: lon}
+	return LL{Lat: lat, Lon: lon}
 }
 
 // Point generates a grid point from a lat/lon
-func (ll *LL) Point() *Point {
+func (ll LL) Point() Point {
 	e := ll.Lon * hBase / 180.0
 	n := math.Log(math.Tan((90+ll.Lat)*hD2R/2)) / math.Pi * hBase
 
-	return &Point{E: e, N: n}
+	return Point{E: e, N: n}
 }
 
 // String returns a string representation of this coordinates
-func (ll *LL) String() string {
+func (ll LL) String() string {
 	return fmt.Sprintf("[%f, %f]", ll.Lat, ll.Lon)
 }

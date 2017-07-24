@@ -137,7 +137,7 @@ func unmarshalRawFields(fields []tcFieldMapping) error {
 }
 
 func loadTestCasesFromJson(filename string, rawUnmarshal func([]json.RawMessage) error) {
-	file, err := os.Open("testcases/" + filename)
+	file, err := os.Open("testdata/" + filename)
 	if err != nil {
 		log.Fatalf("Error: %s", err)
 		return

@@ -10,7 +10,7 @@ type Point struct {
 }
 
 // Position returns the X/Y grid position of the Point
-func (p *Point) Position(z *Zoom) *Position {
+func (p Point) Position(z *Zoom) *Position {
 	x, y := (p.E+p.N/hK)/z.w, (p.N-hK*p.E)/z.h
 	x0, y0 := math.Floor(x), math.Floor(y)
 	xd, yd := x-x0, y-y0

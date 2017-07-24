@@ -6,7 +6,7 @@ import (
 )
 
 var _ = Describe("Point", func() {
-	var p1, p2 *Point
+	var p1, p2 Point
 
 	BeforeEach(func() {
 		p1 = NewLL(-2.7315738409448347, 178.9405262207031).Point()
