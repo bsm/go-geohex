@@ -72,8 +72,7 @@ func init() {
 	}
 
 	for level := 0; level <= MaxLevel; level++ {
-		size := math.Pow(3, float64(level+2))
-		zooms[level] = &zoom{size: int(size)}
+		zooms[level] = &zoom{size: pow3[level+2]}
 	}
 
 	for i, b := range hChars {
