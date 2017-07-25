@@ -79,7 +79,7 @@ func DecodePosition(code string) (*Position, error) {
 		code = strconv.Itoa(base) + code[2:]
 	}
 
-	pos := &Position{z: zoom}
+	var x, y int
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
@@ -91,18 +91,31 @@ func DecodePosition(code string) (*Position, error) {
 		c3y := n % 3
 		switch c3x {
 		case 0:
-			pos.X -= pow
+			x -= pow
 		case 2:
-			pos.X += pow
+			x += pow
 		}
 		switch c3y {
 		case 0:
-			pos.Y -= pow
+			y -= pow
 		case 2:
-			pos.Y += pow
+			y += pow
 		}
 	}
-	return pos, nil
+
+	hsteps := int(math.Abs(float64(x - y)))
+	if pow3[lnc] == hsteps && x > y {
+		x, y = y, x //
+	} else if hsteps > pow3[lnc] {
+		dif := hsteps - pow3[lnc]
+		if x > y {
+			x, y = y+dif, x-dif
+		} else if y > x {
+			x, y = y-dif, x+dif
+		}
+	}
+
+	return &Position{X: x, Y: y, z: zoom}, nil
 
 }
 
