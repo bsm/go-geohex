@@ -6,9 +6,7 @@ import (
 )
 
 // LL is a lat/lon tuple
-type LL struct {
-	Lat, Lon float64
-}
+type LL struct{ Lat, Lon float64 }
 
 // NewLL creates a new normalised LL
 func NewLL(lat, lon float64) LL {

@@ -1,25 +1,34 @@
 package geohex
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"math/rand"
 	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const testItems = 30
+func TestSuite(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "geohex")
+}
+
+// --------------------------------------------------------------------
+
+const benchItems = 30
 
 var (
-	randomGenerator = rand.New(rand.NewSource(0))
-	points          [testItems][2]float64
-	geohex2         [testItems]string
-	geohex6         [testItems]string
-	geohex15        [testItems]string
+	points   [benchItems][2]float64
+	geohex2  [benchItems]string
+	geohex6  [benchItems]string
+	geohex15 [benchItems]string
 )
 
 func init() {
-	for i := 0; i < testItems; i++ {
-		points[i] = [2]float64{randomGenerator.Float64()*180 - 90, randomGenerator.Float64()*360 - 180}
+	rnd := rand.New(rand.NewSource(0))
+
+	for i := 0; i < benchItems; i++ {
+		points[i] = [2]float64{rnd.Float64()*180 - 90, rnd.Float64()*360 - 180}
 		zone2, _ := Encode(points[i][0], points[i][1], 2)
 		geohex2[i] = zone2.String()
 		zone6, _ := Encode(points[i][0], points[i][1], 6)
@@ -29,47 +38,42 @@ func init() {
 	}
 }
 
-func TestSuite(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "geohex")
-}
-
 func BenchmarkEncodeLevel2(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
+		p := points[i%benchItems]
 		Encode(p[0], p[1], 2)
 	}
 }
 
 func BenchmarkEncodeLevel6(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
+		p := points[i%benchItems]
 		Encode(p[0], p[1], 6)
 	}
 }
 
 func BenchmarkEncodeLevel15(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
+		p := points[i%benchItems]
 		Encode(p[0], p[1], 15)
 	}
 }
 
 func BenchmarkDecodeLevel2(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		Decode(geohex2[i%testItems])
+		Decode(geohex2[i%benchItems])
 	}
 }
 
 func BenchmarkDecodeLevel6(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		Decode(geohex6[i%testItems])
+		Decode(geohex6[i%benchItems])
 	}
 }
 
 func BenchmarkDecodeLevel15(b *testing.B) {
 	for i := 0; i < b.N; i += 1 {
-		Decode(geohex15[i%testItems])
+		Decode(geohex15[i%benchItems])
 	}
 }
 

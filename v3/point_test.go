@@ -19,15 +19,14 @@ var _ = Describe("Point", func() {
 		Expect(p2.E).To(BeNumerically("~", 19244476.4, 0.1))
 		Expect(p2.N).To(BeNumerically("~", 17189491.4, 0.1))
 	})
-})
 
-var _ = Describe("Point to position", func() {
-	for _, tc := range loadLL2PositionTestCases() {
-		tc := tc
-		It("should create position from "+tc.ll.String(), func() {
+	It("should create positions", func() {
+		for _, tc := range testCasesLL2Pos {
+			tc := tc
 			pos := tc.ll.Point().Position(zooms[tc.level])
-			Expect(pos.X).To(Equal(tc.expectedX))
-			Expect(pos.Y).To(Equal(tc.expectedY))
-		})
-	}
+			Expect(pos.X).To(Equal(tc.expX), "for %s", tc.ll)
+			Expect(pos.Y).To(Equal(tc.expY), "for %s", tc.ll)
+		}
+	})
+
 })

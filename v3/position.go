@@ -3,12 +3,73 @@ package geohex
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 // Position implements a grid tile position
 type Position struct {
 	X, Y int
 	z    *Zoom
+}
+
+// Decode decodes a string code into a Position,
+// useful for further operations without having to decode it into a Lat/Lon, like calculating neighbours
+func Decode(code string) (*Position, error) {
+	lnc := len(code)
+	zoom, ok := zooms[lnc-2]
+	if !ok {
+		return nil, ErrCodeInvalid
+	}
+
+	var n1, n2 int
+	if n1, ok = hIndex[code[0]]; !ok {
+		return nil, ErrCodeInvalid
+	} else if n2, ok = hIndex[code[1]]; !ok {
+		return nil, ErrCodeInvalid
+	}
+
+	base := n1*30 + n2
+	if base < 100 {
+		code = "0" + strconv.Itoa(base) + code[2:]
+	} else {
+		code = strconv.Itoa(base) + code[2:]
+	}
+
+	pos := &Position{z: zoom}
+	for i, digit := range code {
+		n := int64(digit - '0')
+		if n < 0 || n > 9 {
+			return nil, fmt.Errorf("expected a digit, got '%b'", digit)
+		}
+
+		pow := pow3[lnc-i]
+		c3x := n / 3
+		c3y := n % 3
+		switch c3x {
+		case 0:
+			pos.X -= pow
+		case 2:
+			pos.X += pow
+		}
+		switch c3y {
+		case 0:
+			pos.Y -= pow
+		case 2:
+			pos.Y += pow
+		}
+	}
+	return pos, nil
+
+}
+
+// Encode encodes a lat/lon/level into a Position
+func Encode(lat, lon float64, level int) (*Position, error) {
+	zoom, ok := zooms[level]
+	if !ok {
+		return nil, ErrLevelInvalid
+	}
+
+	return NewLL(lat, lon).Point().Position(zoom), nil
 }
 
 // Centroid returns the centroid point of the tile
