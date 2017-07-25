@@ -18,9 +18,10 @@ func (t Tile) LL() LL {
 	}
 	size := sizes[t.Level]
 
+	// First of all, calculate coordinates of the projection
+	// e, n are coordinates of Mercator projection of lat/lon to a 1x1 square
 	hX := float64(t.X) / 2
 	hY := float64(t.Y) / 2
-
 	e := (hX - hY) / float64(size)
 	n := (hX + hY) / float64(size) * hK
 

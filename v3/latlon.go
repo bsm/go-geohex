@@ -28,9 +28,12 @@ func (ll LL) tile(level int) (Tile, error) {
 	}
 	size := sizes[level]
 
+	// First of all, calculate coordinates of the projection
+	// e, n are coordinates of Mercator projection of lat/lon to a 1x1 square
 	e := ll.Lon / 360.0
 	n := math.Log(math.Tan((ll.Lat*deg2Rad+pio2)/2)) / math.Pi / 2
 
+	// x, y are coordinates over the tiles, but we have to check which tile they belong to
 	x := (n/hK + e) * float64(size)
 	y := (n/hK - e) * float64(size)
 
