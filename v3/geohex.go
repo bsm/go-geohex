@@ -39,7 +39,10 @@ func Decode(code string) (LL, error) {
 }
 
 var (
-	hChars = []byte{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
+	hChars = []byte{
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+	}
 	hIndex = make(map[byte]int, len(hChars))
 	hK     = math.Tan(math.Pi / 6.0)
 )
@@ -53,15 +56,15 @@ var (
 	// Precalculated math stuff
 	pow3     [MaxLevel + 3]int
 	halfPow3 [MaxLevel + 3]int
+
+	// Cached zooms lookup
+	zooms [MaxLevel + 1]*zoom
 )
 
 // zoom is a helper for level dimensions
 type zoom struct {
 	size int
 }
-
-// Cached zooms lookup
-var zooms [MaxLevel + 1]*zoom
 
 // Init zooms
 func init() {
