@@ -32,9 +32,8 @@ const (
 	hEr   = 6371007.2
 )
 
-// Zoom is a helper for level dimensions
-type Zoom struct {
-	level int
+// zoom is a helper for level dimensions
+type zoom struct {
 	size  float64
 	scale float64
 	w     float64
@@ -42,7 +41,7 @@ type Zoom struct {
 }
 
 // Cached zooms lookup
-var zooms = make(map[int]*Zoom, 20)
+var zooms = make(map[int]zoom, 20)
 
 // Init cache
 func init() {
@@ -58,6 +57,6 @@ func init() {
 
 	for level := 0; level <= MaxLevel; level++ {
 		size := hBase / math.Pow(3, float64(level+3))
-		zooms[level] = &Zoom{level: level, size: size, scale: size / hEr, w: 6 * size, h: 6 * size * hK}
+		zooms[level] = zoom{size: size, scale: size / hEr, w: 6 * size, h: 6 * size * hK}
 	}
 }

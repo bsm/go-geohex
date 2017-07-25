@@ -21,11 +21,8 @@ var _ = Describe("Point", func() {
 	})
 
 	It("should create positions", func() {
-		for _, tc := range testCasesLL2Pos {
-			tc := tc
-			pos := tc.ll.Point().Position(zooms[tc.level])
-			Expect(pos.X).To(Equal(tc.expX), "for %s", tc.ll)
-			Expect(pos.Y).To(Equal(tc.expY), "for %s", tc.ll)
+		for _, tc := range testCasesCoord2XY {
+			Expect(tc.ll.Point().Position(tc.level)).To(Equal(tc.exp), "for %#v", tc)
 		}
 	})
 

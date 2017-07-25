@@ -10,12 +10,17 @@ type Point struct {
 }
 
 // Position returns the X/Y grid position of the Point
-func (p Point) Position(z *Zoom) *Position {
+func (p Point) Position(level int) (Position, error) {
+	z, ok := zooms[level]
+	if !ok {
+		return Position{}, ErrLevelInvalid
+	}
+
 	x, y := (p.E+p.N/hK)/z.w, (p.N-hK*p.E)/z.h
 	x0, y0 := math.Floor(x), math.Floor(y)
 	xd, yd := x-x0, y-y0
 
-	pos := Position{z: z}
+	pos := Position{Level: level}
 	if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
 		pos.X, pos.Y = int(x0)+1, int(y0)+1
 	} else if yd <= -xd+1 && yd > 2*xd-1 && yd < 0.5*xd+0.5 {
@@ -32,5 +37,5 @@ func (p Point) Position(z *Zoom) *Position {
 		pos.X, pos.Y = pos.Y, pos.X
 	}
 
-	return &pos
+	return pos, nil
 }

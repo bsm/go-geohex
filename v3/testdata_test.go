@@ -11,26 +11,25 @@ import (
 // Test cases downloaded from http://geohex.net/testcase/v3.2.html
 
 type (
-	testCaseCode2LL struct {
+	testCaseCode2HEX struct {
 		code string
 		exp  LL
 	}
-	testCaseLL2Code struct {
+	testCaseCoord2HEX struct {
 		level int
 		ll    LL
 		exp   string
 	}
-	testCaseLL2Pos struct {
+	testCaseCoord2XY struct {
 		level int
 		ll    LL
-		expX  int
-		expY  int
+		exp   Position
 	}
-	testCaseCode2Pos struct {
+	testCaseCode2XY struct {
 		code string
 		exp  Position
 	}
-	testCasePos2Code struct {
+	testCaseXY2HEX struct {
 		level int
 		x     int
 		y     int
@@ -39,80 +38,84 @@ type (
 )
 
 var (
-	testCasesCode2LL  []testCaseCode2LL
-	testCasesLL2Code  []testCaseLL2Code
-	testCasesLL2Pos   []testCaseLL2Pos
-	testCasesCode2Pos []testCaseCode2Pos
-	testCasesPos2Code []testCasePos2Code
+	testCasesCode2HEX  []testCaseCode2HEX
+	testCasesCoord2HEX []testCaseCoord2HEX
+	testCasesCoord2XY  []testCaseCoord2XY
+	testCasesCode2XY   []testCaseCode2XY
+	testCasesXY2HEX    []testCaseXY2HEX
 )
 
 var _ = BeforeSuite(func() {
 
 	// http://geohex.net/testcase/hex_v3.2_test_code2HEX.json
 	loadTestCasesFromJson("hex_v3.2_test_code2HEX.json", func(raw []json.RawMessage) error {
-		tc := testCaseCode2LL{}
+		tc := testCaseCode2HEX{}
 		err := unmarshalRawFields([]testCaseFieldMap{
 			{raw[0], &tc.code},
 			{raw[1], &tc.exp.Lat},
 			{raw[2], &tc.exp.Lon},
 		})
-		testCasesCode2LL = append(testCasesCode2LL, tc)
+		testCasesCode2HEX = append(testCasesCode2HEX, tc)
 		return err
 	})
 
 	// http://geohex.net/testcase/hex_v3.2_test_coord2HEX.json
 	loadTestCasesFromJson("hex_v3.2_test_coord2HEX.json", func(raw []json.RawMessage) error {
-		tc := testCaseLL2Code{}
+		tc := testCaseCoord2HEX{}
 		err := unmarshalRawFields([]testCaseFieldMap{
 			{raw[0], &tc.level},
 			{raw[1], &tc.ll.Lat},
 			{raw[2], &tc.ll.Lon},
 			{raw[3], &tc.exp},
 		})
-		testCasesLL2Code = append(testCasesLL2Code, tc)
+		testCasesCoord2HEX = append(testCasesCoord2HEX, tc)
 		return err
 	})
 
 	// http://geohex.net/testcase/hex_v3.2_test_coord2XY.json
 	loadTestCasesFromJson("hex_v3.2_test_coord2XY.json", func(raw []json.RawMessage) error {
-		tc := testCaseLL2Pos{}
+		tc := testCaseCoord2XY{}
 		err := unmarshalRawFields([]testCaseFieldMap{
 			{raw[0], &tc.level},
 			{raw[1], &tc.ll.Lat},
 			{raw[2], &tc.ll.Lon},
-			{raw[3], &tc.expX},
-			{raw[4], &tc.expY},
+			{raw[3], &tc.exp.X},
+			{raw[4], &tc.exp.Y},
 		})
-		testCasesLL2Pos = append(testCasesLL2Pos, tc)
+		tc.exp.Level = tc.level
+		testCasesCoord2XY = append(testCasesCoord2XY, tc)
 		return err
 	})
 
 	// http://geohex.net/testcase/hex_v3.2_test_code2XY.json
 	loadTestCasesFromJson("hex_v3.2_test_code2XY.json", func(raw []json.RawMessage) error {
-		tc := testCaseCode2Pos{}
+		tc := testCaseCode2XY{}
 		err := unmarshalRawFields([]testCaseFieldMap{
 			{raw[0], &tc.code},
 			{raw[1], &tc.exp.X},
 			{raw[2], &tc.exp.Y},
 		})
-		testCasesCode2Pos = append(testCasesCode2Pos, tc)
+		tc.exp.Level = len(tc.code) - 2
+		testCasesCode2XY = append(testCasesCode2XY, tc)
 		return err
 	})
 
 	// http://geohex.net/testcase/hex_v3.2_test_XY2HEX.json
 	loadTestCasesFromJson("hex_v3.2_test_XY2HEX.json", func(raw []json.RawMessage) error {
-		tc := testCasePos2Code{}
+		tc := testCaseXY2HEX{}
 		err := unmarshalRawFields([]testCaseFieldMap{
 			{raw[0], &tc.level},
 			{raw[1], &tc.x},
 			{raw[2], &tc.y},
 			{raw[3], &tc.exp},
 		})
-		testCasesPos2Code = append(testCasesPos2Code, tc)
+		testCasesXY2HEX = append(testCasesXY2HEX, tc)
 		return err
 	})
 
 })
+
+// --------------------------------------------------------------------
 
 type testCaseFieldMap struct {
 	f json.RawMessage
@@ -129,7 +132,7 @@ func unmarshalRawFields(fields []testCaseFieldMap) error {
 }
 
 func loadTestCasesFromJson(filename string, rawUnmarshal func([]json.RawMessage) error) {
-	file, err := os.Open("testdata/" + filename)
+	file, err := os.Open("../testdata/" + filename)
 	Expect(err).NotTo(HaveOccurred())
 	defer file.Close()
 

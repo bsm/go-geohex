@@ -77,38 +77,17 @@ func BenchmarkDecodeLevel15(b *testing.B) {
 	}
 }
 
-var _ = Describe("Zoom", func() {
-	var subject *Zoom
+var _ = Describe("zoom", func() {
 
 	It("should preload zooms", func() {
 		Expect(zooms).To(HaveLen(21))
 	})
 
 	It("should calculate attributes", func() {
-		subject = zooms[7]
-		Expect(subject.level).To(Equal(7))
-		Expect(subject.size).To(BeNumerically("~", 339.337, 0.001))
-		Expect(subject.scale).To(BeNumerically("~", 0.000053, 0.000001))
-		Expect(subject.w).To(BeNumerically("~", 2036.022, 0.001))
-		Expect(subject.h).To(BeNumerically("~", 1175.498, 0.001))
+		zoom := zooms[7]
+		Expect(zoom.size).To(BeNumerically("~", 339.337, 0.001))
+		Expect(zoom.scale).To(BeNumerically("~", 0.000053, 0.000001))
+		Expect(zoom.w).To(BeNumerically("~", 2036.022, 0.001))
+		Expect(zoom.h).To(BeNumerically("~", 1175.498, 0.001))
 	})
-})
-
-var _ = Describe("LL", func() {
-
-	It("should create new LLs", func() {
-		ll1 := NewLL(66.68, -87.98)
-		Expect(ll1.Lat).To(Equal(66.68))
-		Expect(ll1.Lon).To(Equal(-87.98))
-
-		ll2 := NewLL(0.0, 370.5)
-		Expect(ll2.Lat).To(Equal(0.0))
-		Expect(ll2.Lon).To(Equal(10.5))
-	})
-
-	It("should create points", func() {
-		pt := NewLL(66.68, -87.98).Point()
-		Expect(pt).To(BeAssignableToTypeOf(Point{}))
-	})
-
 })
