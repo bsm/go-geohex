@@ -7,25 +7,16 @@ import (
 	"testing"
 )
 
-const testItems = 30
+const testItems = 10000
 
 var (
 	randomGenerator = rand.New(rand.NewSource(0))
 	points          [testItems][2]float64
-	geohex2         [testItems]string
-	geohex6         [testItems]string
-	geohex15        [testItems]string
 )
 
 func init() {
 	for i := 0; i < testItems; i++ {
 		points[i] = [2]float64{randomGenerator.Float64()*180 - 90, randomGenerator.Float64()*360 - 180}
-		zone2, _ := Encode(points[i][0], points[i][1], 2)
-		geohex2[i] = zone2.String()
-		zone6, _ := Encode(points[i][0], points[i][1], 6)
-		geohex6[i] = zone6.String()
-		zone15, _ := Encode(points[i][0], points[i][1], 15)
-		geohex15[i] = zone15.String()
 	}
 }
 
@@ -35,76 +26,99 @@ func TestSuite(t *testing.T) {
 }
 
 func BenchmarkEncodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
-		Encode(p[0], p[1], 2)
-	}
+	benchmarkEncode(b, 2)
 }
 
 func BenchmarkEncodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
-		Encode(p[0], p[1], 6)
-	}
+	benchmarkEncode(b, 6)
 }
 
 func BenchmarkEncodeLevel15(b *testing.B) {
+	benchmarkEncode(b, 15)
+}
+
+func benchmarkEncode(b *testing.B, level int) {
+	b.ResetTimer()
 	for i := 0; i < b.N; i += 1 {
 		p := points[i%testItems]
-		Encode(p[0], p[1], 15)
+		Encode(p[0], p[1], level)
 	}
 }
 
 func BenchmarkDecodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex2[i%testItems])
-	}
+	benchmarkDecode(b, 2)
 }
 
 func BenchmarkDecodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex6[i%testItems])
-	}
+	benchmarkDecode(b, 6)
 }
 
 func BenchmarkDecodeLevel15(b *testing.B) {
+	benchmarkDecode(b, 15)
+}
+
+func benchmarkDecode(b *testing.B, level int) {
+	codes := [testItems]string{}
+	for i := 0; i < testItems; i++ {
+		codes[i], _ = Encode(points[i][0], points[i][1], level)
+	}
+	b.ResetTimer()
 	for i := 0; i < b.N; i += 1 {
-		Decode(geohex15[i%testItems])
+		Decode(codes[i%testItems])
 	}
 }
 
-var _ = Describe("Zoom", func() {
-	var subject *Zoom
+func BenchmarkDecodePositionLevel2(b *testing.B) {
+	benchmarkDecodePosition(b, 2)
+}
 
+func BenchmarkDecodePositionLevel6(b *testing.B) {
+	benchmarkDecodePosition(b, 6)
+}
+
+func BenchmarkDecodePositionLevel15(b *testing.B) {
+	benchmarkDecodePosition(b, 15)
+}
+
+func benchmarkDecodePosition(b *testing.B, level int) {
+	codes := [testItems]string{}
+	for i := 0; i < testItems; i++ {
+		codes[i], _ = Encode(points[i][0], points[i][1], level)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i += 1 {
+		DecodePosition(codes[i%testItems])
+	}
+}
+
+var _ = Describe("Encode Code from LatLon", func() {
+	for _, tc := range loadLL2CodeTestCases() {
+		tc := tc
+		It("should encode "+tc.ll.String()+" to "+tc.expectedCode, func() {
+			code, err := Encode(tc.ll.Lat, tc.ll.Lon, tc.level)
+			Expect(err).To(BeNil())
+			Expect(code).To(Equal(tc.expectedCode))
+		})
+	}
+})
+
+var _ = Describe("Decode LatLon from Code", func() {
+
+	for _, tc := range loadCode2LLTestCases() {
+		tc := tc
+		It("should decode latlon "+tc.expectedLL.String()+" from "+tc.code, func() {
+			act, err := Decode(tc.code)
+			Expect(err).To(BeNil())
+
+			Expect(act.Lat).To(BeNumerically("~", tc.expectedLL.Lat))
+			Expect(act.Lon).To(BeNumerically("~", tc.expectedLL.Lon))
+		})
+	}
+
+})
+
+var _ = Describe("zoom", func() {
 	It("should preload zooms", func() {
 		Expect(zooms).To(HaveLen(21))
 	})
-
-	It("should calculate attributes", func() {
-		subject = zooms[7]
-		Expect(subject.level).To(Equal(7))
-		Expect(subject.size).To(BeNumerically("~", 339.337, 0.001))
-		Expect(subject.scale).To(BeNumerically("~", 0.000053, 0.000001))
-		Expect(subject.w).To(BeNumerically("~", 2036.022, 0.001))
-		Expect(subject.h).To(BeNumerically("~", 1175.498, 0.001))
-	})
-})
-
-var _ = Describe("LL", func() {
-
-	It("should create new LLs", func() {
-		ll1 := NewLL(66.68, -87.98)
-		Expect(ll1.Lat).To(Equal(66.68))
-		Expect(ll1.Lon).To(Equal(-87.98))
-
-		ll2 := NewLL(0.0, 370.5)
-		Expect(ll2.Lat).To(Equal(0.0))
-		Expect(ll2.Lon).To(Equal(10.5))
-	})
-
-	It("should create points", func() {
-		pt := NewLL(66.68, -87.98).Point()
-		Expect(pt).To(BeAssignableToTypeOf(Point{}))
-	})
-
 })

@@ -25,7 +25,7 @@ var _ = Describe("Point to position", func() {
 	for _, tc := range loadLL2PositionTestCases() {
 		tc := tc
 		It("should create position from "+tc.ll.String(), func() {
-			pos := tc.ll.Point().Position(zooms[tc.level])
+			pos, _ := tc.ll.Point().Position(tc.level)
 			Expect(pos.X).To(Equal(tc.expectedX))
 			Expect(pos.Y).To(Equal(tc.expectedY))
 		})
