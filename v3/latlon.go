@@ -27,7 +27,7 @@ func (ll LL) Point() Point {
 }
 
 // Position encodes the position from a lat/lon
-func (ll LL) Position(level int) (Position, error) {
+func (ll LL) Position(level uint8) (Position, error) {
 	return ll.Point().Position(level)
 }
 

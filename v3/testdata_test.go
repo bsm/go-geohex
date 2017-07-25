@@ -16,12 +16,12 @@ type (
 		exp  LL
 	}
 	testCaseCoord2HEX struct {
-		level int
+		level uint8
 		ll    LL
 		exp   string
 	}
 	testCaseCoord2XY struct {
-		level int
+		level uint8
 		ll    LL
 		exp   Position
 	}
@@ -30,7 +30,7 @@ type (
 		exp  Position
 	}
 	testCaseXY2HEX struct {
-		level int
+		level uint8
 		x     int
 		y     int
 		exp   string
@@ -95,7 +95,7 @@ var _ = BeforeSuite(func() {
 			{raw[1], &tc.exp.X},
 			{raw[2], &tc.exp.Y},
 		})
-		tc.exp.Level = len(tc.code) - 2
+		tc.exp.Level = uint8(len(tc.code) - 2)
 		testCasesCode2XY = append(testCasesCode2XY, tc)
 		return err
 	})

@@ -10,7 +10,7 @@ type Point struct {
 }
 
 // Position returns the X/Y grid position of the Point
-func (p Point) Position(level int) (Position, error) {
+func (p Point) Position(level uint8) (Position, error) {
 	z, ok := zooms[level]
 	if !ok {
 		return Position{}, ErrLevelInvalid

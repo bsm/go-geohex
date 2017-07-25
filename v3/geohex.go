@@ -41,7 +41,7 @@ type zoom struct {
 }
 
 // Cached zooms lookup
-var zooms = make(map[int]zoom, 20)
+var zooms = make(map[uint8]zoom, 20)
 
 // Init cache
 func init() {
@@ -55,7 +55,7 @@ func init() {
 		hIndex[b] = i
 	}
 
-	for level := 0; level <= MaxLevel; level++ {
+	for level := uint8(0); level <= MaxLevel; level++ {
 		size := hBase / math.Pow(3, float64(level+3))
 		zooms[level] = zoom{size: size, scale: size / hEr, w: 6 * size, h: 6 * size * hK}
 	}

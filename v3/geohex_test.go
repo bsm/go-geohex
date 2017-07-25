@@ -29,12 +29,12 @@ func init() {
 
 	for i := 0; i < benchItems; i++ {
 		points[i] = [2]float64{rnd.Float64()*180 - 90, rnd.Float64()*360 - 180}
-		zone2, _ := Encode(points[i][0], points[i][1], 2)
-		geohex2[i] = zone2.String()
-		zone6, _ := Encode(points[i][0], points[i][1], 6)
-		geohex6[i] = zone6.String()
-		zone15, _ := Encode(points[i][0], points[i][1], 15)
-		geohex15[i] = zone15.String()
+		pos2, _ := Encode(points[i][0], points[i][1], 2)
+		geohex2[i] = pos2.Code()
+		pos6, _ := Encode(points[i][0], points[i][1], 6)
+		geohex6[i] = pos6.Code()
+		pos15, _ := Encode(points[i][0], points[i][1], 15)
+		geohex15[i] = pos15.Code()
 	}
 }
 

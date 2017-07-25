@@ -8,14 +8,14 @@ import (
 
 // Position implements a grid tile position
 type Position struct {
-	X, Y, Level int
+	X, Y  int
+	Level uint8
 }
 
-// Decode decodes a string code into a Position,
-// useful for further operations without having to decode it into a Lat/Lon, like calculating neighbours
+// Decode decodes a string code into a Position.
 func Decode(code string) (Position, error) {
 	lnc := len(code)
-	pos := Position{Level: lnc - 2}
+	pos := Position{Level: uint8(lnc - 2)}
 
 	if pos.Level < 0 || pos.Level > MaxLevel {
 		return pos, ErrLevelInvalid
@@ -38,7 +38,7 @@ func Decode(code string) (Position, error) {
 	}
 
 	for i, digit := range code {
-		n := int64(digit - '0')
+		n := uint8(digit - '0')
 		if n < 0 || n > 9 {
 			return pos, fmt.Errorf("expected a digit, got %q", string(digit))
 		}
@@ -79,7 +79,7 @@ func Decode(code string) (Position, error) {
 }
 
 // Encode encodes a lat/lon/level into a Position
-func Encode(lat, lon float64, level int) (Position, error) {
+func Encode(lat, lon float64, level uint8) (Position, error) {
 	return NewLL(lat, lon).Position(level)
 }
 
@@ -97,12 +97,12 @@ func (p Position) Centroid() Point {
 func (p Position) LL() LL {
 	c := p.Centroid()
 	z := zooms[p.Level]
-	lat := 180 / math.Pi * (2*math.Atan(math.Exp(c.N/hBase*180*hD2R)) - math.Pi/2)
 
-	var lon float64
-	if math.Abs(-hBase-c.E) <= z.size/2 {
-		lon = -180
-	} else {
+	exp := math.Exp(c.N / hBase * 180 * hD2R)
+	lat := 180.0 / math.Pi * (2*math.Atan(exp) - math.Pi/2)
+	lon := -180.0
+
+	if math.Abs(-hBase-c.E) > z.size/2 {
 		lon = c.E / hBase * 180
 	}
 
@@ -112,13 +112,14 @@ func (p Position) LL() LL {
 // Code returns string Code of this position
 func (p Position) Code() string {
 	x, y := p.X, p.Y
-	bx, by, base := make([]int, 3), make([]int, 3), 0
-	c3x, c3y := 0, 0
+	bx, by, base := make([]uint8, 3), make([]uint8, 3), 0
 	code := make([]byte, p.Level+2)
 
-	for i := 0; i < p.Level+3; i++ {
-		pow := pow3[p.Level+2-i]
-		p2c := halfPow3[p.Level+2-i]
+	var c3x, c3y uint8
+	for i := uint8(0); i < p.Level+3; i++ {
+		n := int(p.Level + 2 - i)
+		pow := pow3[n]
+		p2c := halfPow3[n]
 
 		if x >= p2c {
 			x -= pow
@@ -141,7 +142,7 @@ func (p Position) Code() string {
 		}
 
 		if i >= 3 {
-			code[i-1] = '0' + byte(3*c3x+c3y)
+			code[i-1] = '0' + uint8(3*c3x+c3y)
 		} else {
 			bx[i] = c3x
 			by[i] = c3y
@@ -160,15 +161,10 @@ func (p Position) Code() string {
 		}
 	}
 
-	base = 3*(100*bx[0]+10*bx[1]+bx[2]) + (100*by[0] + 10*by[1] + by[2])
+	base = 3*(100*int(bx[0])+10*int(bx[1])+int(bx[2])) + (100*int(by[0]) + 10*int(by[1]) + int(by[2]))
 
 	code[0] = hChars[base/30]
 	code[1] = hChars[base%30]
 
 	return string(code)
-}
-
-// String returns a String representation of this position (without taking in account zoom level)
-func (p Position) String() string {
-	return fmt.Sprintf("[%d, %d]@%d", p.X, p.Y, p.Level)
 }
