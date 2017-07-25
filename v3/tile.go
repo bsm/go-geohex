@@ -11,6 +11,17 @@ type Tile struct {
 	X, Y, Level int
 }
 
+// NewTile instantiates a new normalized tile, but it does not check for level to be valid
+func NewTile(x, y, level int) Tile {
+	// x-y  == size means that we've wrapped through the eastmost border
+	// For example, there's no x=0,y=-9 tile on level 0, that's x=-9,y=0
+	if x-y == sizes[level] {
+		x, y = y, x
+	}
+
+	return Tile{X: x, Y: y, Level: level}
+}
+
 // LL converts the tile into a LL
 func (t Tile) LL() LL {
 	if t.Level < 0 || t.Level > MaxLevel {
@@ -160,6 +171,17 @@ func DecodeTile(code string) (Tile, error) {
 	}
 
 	return Tile{X: x, Y: y, Level: level}, nil
+}
+
+func (t Tile) Neighbours() []Tile {
+	return []Tile{
+		NewTile(t.X+1, t.Y+1, t.Level),
+		NewTile(t.X-1, t.Y-1, t.Level),
+		NewTile(t.X+1, t.Y, t.Level),
+		NewTile(t.X-1, t.Y, t.Level),
+		NewTile(t.X, t.Y+1, t.Level),
+		NewTile(t.X, t.Y-1, t.Level),
+	}
 }
 
 // String returns a String representation of this tile
