@@ -7,15 +7,16 @@ import (
 )
 
 func ExampleEncode() {
-	code, _ := geohex.Encode(35.647401, 139.716911, 6)
-	fmt.Println(code)
+	pos, _ := geohex.Encode(35.647401, 139.716911, 6)
+	fmt.Println(pos.Code())
 
 	// Output:
 	// XM488541
 }
 
 func ExampleDecode() {
-	ll, _ := geohex.Decode("XM488541")
+	pos, _ := geohex.Decode("XM488541")
+	ll := pos.LL()
 	fmt.Println(ll.Lat, ll.Lon)
 
 	// Output:

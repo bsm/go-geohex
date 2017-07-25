@@ -1,110 +1,99 @@
 package geohex
 
 import (
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 	"math/rand"
 	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const testItems = 30
-
-var (
-	randomGenerator = rand.New(rand.NewSource(0))
-	points          [testItems][2]float64
-	geohex2         [testItems]string
-	geohex6         [testItems]string
-	geohex15        [testItems]string
-)
-
-func init() {
-	for i := 0; i < testItems; i++ {
-		points[i] = [2]float64{randomGenerator.Float64()*180 - 90, randomGenerator.Float64()*360 - 180}
-		zone2, _ := Encode(points[i][0], points[i][1], 2)
-		geohex2[i] = zone2.String()
-		zone6, _ := Encode(points[i][0], points[i][1], 6)
-		geohex6[i] = zone6.String()
-		zone15, _ := Encode(points[i][0], points[i][1], 15)
-		geohex15[i] = zone15.String()
-	}
-}
-
-func TestSuite(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "geohex")
-}
-
-func BenchmarkEncodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
-		Encode(p[0], p[1], 2)
-	}
-}
-
-func BenchmarkEncodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
-		Encode(p[0], p[1], 6)
-	}
-}
-
-func BenchmarkEncodeLevel15(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%testItems]
-		Encode(p[0], p[1], 15)
-	}
-}
-
-func BenchmarkDecodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex2[i%testItems])
-	}
-}
-
-func BenchmarkDecodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex6[i%testItems])
-	}
-}
-
-func BenchmarkDecodeLevel15(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex15[i%testItems])
-	}
-}
-
-var _ = Describe("Zoom", func() {
-	var subject *Zoom
+var _ = Describe("zoom", func() {
 
 	It("should preload zooms", func() {
 		Expect(zooms).To(HaveLen(21))
 	})
 
 	It("should calculate attributes", func() {
-		subject = zooms[7]
-		Expect(subject.level).To(Equal(7))
-		Expect(subject.size).To(BeNumerically("~", 339.337, 0.001))
-		Expect(subject.scale).To(BeNumerically("~", 0.000053, 0.000001))
-		Expect(subject.w).To(BeNumerically("~", 2036.022, 0.001))
-		Expect(subject.h).To(BeNumerically("~", 1175.498, 0.001))
+		zoom := zooms[7]
+		Expect(zoom.size).To(BeNumerically("~", 339.337, 0.001))
+		Expect(zoom.scale).To(BeNumerically("~", 0.000053, 0.000001))
+		Expect(zoom.w).To(BeNumerically("~", 2036.022, 0.001))
+		Expect(zoom.h).To(BeNumerically("~", 1175.498, 0.001))
 	})
 })
 
-var _ = Describe("LL", func() {
+func TestSuite(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "geohex")
+}
 
-	It("should create new LLs", func() {
-		ll1 := NewLL(66.68, -87.98)
-		Expect(ll1.Lat).To(Equal(66.68))
-		Expect(ll1.Lon).To(Equal(-87.98))
+// --------------------------------------------------------------------
 
-		ll2 := NewLL(0.0, 370.5)
-		Expect(ll2.Lat).To(Equal(0.0))
-		Expect(ll2.Lon).To(Equal(10.5))
-	})
+func BenchmarkEncode(b *testing.B) {
+	seeds := benchmarkSeedLL(300)
 
-	It("should create points", func() {
-		pt := NewLL(66.68, -87.98).Point()
-		Expect(pt).To(BeAssignableToTypeOf(Point{}))
-	})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ll := seeds[i%len(seeds)]
+		if _, err := Encode(ll.Lat, ll.Lon, 15); err != nil {
+			b.Fatalf("expected no error but got: %v", err)
+		}
+	}
+}
 
-})
+func BenchmarkDecode(b *testing.B) {
+	seeds, err := benchmarkSeedPos(300)
+	if err != nil {
+		b.Fatalf("expected no error but got: %v", err)
+	}
+
+	codes := make([]string, 0)
+	for _, pos := range seeds {
+		codes = append(codes, pos.Code())
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Decode(codes[i%len(codes)]); err != nil {
+			b.Fatalf("expected no error but got: %v", err)
+		}
+	}
+}
+
+func BenchmarkPosition_Code(b *testing.B) {
+	seeds, err := benchmarkSeedPos(300)
+	if err != nil {
+		b.Fatalf("expected no error but got: %v", err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		pos := seeds[i%len(seeds)]
+		pos.Code()
+	}
+}
+
+func benchmarkSeedLL(n int) []LL {
+	rnd := rand.New(rand.NewSource(0))
+	lls := make([]LL, 0)
+	for i := 0; i < n; i++ {
+		lls = append(lls, LL{
+			Lat: rnd.Float64()*180 - 90,
+			Lon: rnd.Float64()*360 - 180,
+		})
+	}
+	return lls
+}
+
+func benchmarkSeedPos(n int) ([]Position, error) {
+	res := make([]Position, 0)
+	for _, ll := range benchmarkSeedLL(n) {
+		pos, err := Encode(ll.Lat, ll.Lon, 15)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, pos)
+	}
+	return res, nil
+}

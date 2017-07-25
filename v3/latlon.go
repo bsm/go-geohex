@@ -6,9 +6,7 @@ import (
 )
 
 // LL is a lat/lon tuple
-type LL struct {
-	Lat, Lon float64
-}
+type LL struct{ Lat, Lon float64 }
 
 // NewLL creates a new normalised LL
 func NewLL(lat, lon float64) LL {
@@ -26,6 +24,11 @@ func (ll LL) Point() Point {
 	n := math.Log(math.Tan((90+ll.Lat)*hD2R/2)) / math.Pi * hBase
 
 	return Point{E: e, N: n}
+}
+
+// Position encodes the position from a lat/lon
+func (ll LL) Position(level uint8) (Position, error) {
+	return ll.Point().Position(level)
 }
 
 // String returns a string representation of this coordinates

@@ -3,32 +3,106 @@ package geohex
 import (
 	"fmt"
 	"math"
+	"strconv"
 )
 
 // Position implements a grid tile position
 type Position struct {
-	X, Y int
-	z    *Zoom
+	X, Y  int
+	Level uint8
+}
+
+// Decode decodes a string code into a Position.
+func Decode(code string) (Position, error) {
+	lnc := len(code)
+	pos := Position{Level: uint8(lnc - 2)}
+
+	if pos.Level < 0 || pos.Level > MaxLevel {
+		return pos, ErrLevelInvalid
+	}
+
+	var n1, n2 int
+	var ok bool
+
+	if n1, ok = hIndex[code[0]]; !ok {
+		return pos, ErrCodeInvalid
+	} else if n2, ok = hIndex[code[1]]; !ok {
+		return pos, ErrCodeInvalid
+	}
+
+	base := n1*30 + n2
+	if base < 100 {
+		code = "0" + strconv.Itoa(base) + code[2:]
+	} else {
+		code = strconv.Itoa(base) + code[2:]
+	}
+
+	for i, digit := range code {
+		n := uint8(digit - '0')
+		if n < 0 || n > 9 {
+			return pos, fmt.Errorf("expected a digit, got %q", string(digit))
+		}
+
+		pow := pow3[lnc-i]
+		switch n / 3 {
+		case 0:
+			pos.X -= pow
+		case 2:
+			pos.X += pow
+		}
+		switch n % 3 {
+		case 0:
+			pos.Y -= pow
+		case 2:
+			pos.Y += pow
+		}
+	}
+
+	// normalise/adjust X	and Y
+	dA := pos.X - pos.Y
+	if dA < 0 {
+		dA = -dA
+	}
+	if dM := pow3[lnc]; dM == dA && pos.X > pos.Y {
+		pos.X, pos.Y = pos.Y, pos.X
+	} else if dS := dA - dM; dS > 0 {
+		dX := dS / 2
+		dY := dS - dX
+		if pos.X > pos.Y {
+			pos.X, pos.Y = pos.Y+dX+dY, pos.X-dX-dY
+		} else if pos.Y > pos.X {
+			pos.X, pos.Y = pos.Y-dY-dX, pos.X+dX+dY
+		}
+	}
+
+	return pos, nil
+}
+
+// Encode encodes a lat/lon/level into a Position
+func Encode(lat, lon float64, level uint8) (Position, error) {
+	return NewLL(lat, lon).Position(level)
 }
 
 // Centroid returns the centroid point of the tile
-func (p *Position) Centroid() Point {
+func (p Position) Centroid() Point {
+	z := zooms[p.Level]
 	x := float64(p.X)
 	y := float64(p.Y)
-	n := (hK*x*p.z.w + y*p.z.h) / 2
-	e := (n - y*p.z.h) / hK
+	n := (hK*x*z.w + y*z.h) / 2
+	e := (n - y*z.h) / hK
 	return Point{E: e, N: n}
 }
 
 // LL converts the position into a LL
-func (p *Position) LL() LL {
+func (p Position) LL() LL {
 	c := p.Centroid()
-	lat := 180 / math.Pi * (2*math.Atan(math.Exp(c.N/hBase*180*hD2R)) - math.Pi/2)
+	z := zooms[p.Level]
 
-	var lon float64
-	if math.Abs(-hBase-c.E) <= p.z.size/2 {
-		lon = -180
-	} else {
+	exp := math.Exp(c.N / hBase * 180 * hD2R)
+	lat := 180.0 / math.Pi * (2*math.Atan(exp) - math.Pi/2)
+	lon := -180.0
+
+	if math.Abs(-hBase-c.E) > z.size/2 {
 		lon = c.E / hBase * 180
 	}
 
@@ -36,15 +110,17 @@ func (p *Position) LL() LL {
 }
 
 // Code returns string Code of this position
-func (p *Position) Code() string {
+func (p Position) Code() string {
 	x, y := p.X, p.Y
-	bx, by, base := make([]int, 3), make([]int, 3), 0
-	c3x, c3y := 0, 0
-	code := make([]byte, p.z.level+2)
 
-	for i := 0; i < p.z.level+3; i++ {
-		pow := pow3[p.z.level+2-i]
-		p2c := halfPow3[p.z.level+2-i]
+	var code [22]byte
+	var bx, by [3]uint8
+	var c3x, c3y uint8
+
+	for i := uint8(0); i < p.Level+3; i++ {
+		n := int(p.Level + 2 - i)
+		pow := pow3[n]
+		p2c := halfPow3[n]
 
 		if x >= p2c {
 			x -= pow
@@ -67,7 +143,7 @@ func (p *Position) Code() string {
 		}
 
 		if i >= 3 {
-			code[i-1] = '0' + byte(3*c3x+c3y)
+			code[i-1] = '0' + uint8(3*c3x+c3y)
 		} else {
 			bx[i] = c3x
 			by[i] = c3y
@@ -86,19 +162,8 @@ func (p *Position) Code() string {
 		}
 	}
 
-	base = 3*(100*bx[0]+10*bx[1]+bx[2]) + (100*by[0] + 10*by[1] + by[2])
-
+	base := 3*(100*int(bx[0])+10*int(bx[1])+int(bx[2])) + (100*int(by[0]) + 10*int(by[1]) + int(by[2]))
 	code[0] = hChars[base/30]
 	code[1] = hChars[base%30]
-
-	return string(code)
-}
-
-// String returns a String representation of this position (without taking in account zoom level)
-func (p *Position) String() string {
-	level := -1
-	if p.z != nil {
-		level = p.z.level
-	}
-	return fmt.Sprintf("[%d, %d]@%d", p.X, p.Y, level)
+	return string(code[:p.Level+2])
 }
