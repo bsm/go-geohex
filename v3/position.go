@@ -17,12 +17,13 @@ func Decode(code string) (Position, error) {
 	lnc := len(code)
 	pos := Position{Level: lnc - 2}
 
-	_, ok := zooms[lnc-2]
-	if !ok {
-		return pos, ErrCodeInvalid
+	if pos.Level < 0 || pos.Level > MaxLevel {
+		return pos, ErrLevelInvalid
 	}
 
 	var n1, n2 int
+	var ok bool
+
 	if n1, ok = hIndex[code[0]]; !ok {
 		return pos, ErrCodeInvalid
 	} else if n2, ok = hIndex[code[1]]; !ok {
@@ -39,27 +40,42 @@ func Decode(code string) (Position, error) {
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
-			return pos, fmt.Errorf("expected a digit, got '%b'", digit)
+			return pos, fmt.Errorf("expected a digit, got %q", string(digit))
 		}
 
 		pow := pow3[lnc-i]
-		c3x := n / 3
-		c3y := n % 3
-		switch c3x {
+		switch n / 3 {
 		case 0:
 			pos.X -= pow
 		case 2:
 			pos.X += pow
 		}
-		switch c3y {
+		switch n % 3 {
 		case 0:
 			pos.Y -= pow
 		case 2:
 			pos.Y += pow
 		}
 	}
-	return pos, nil
 
+	// normalise/adjust X	and Y
+	dA := pos.X - pos.Y
+	if dA < 0 {
+		dA = -dA
+	}
+	if dM := pow3[lnc]; dM == dA && pos.X > pos.Y {
+		pos.X, pos.Y = pos.Y, pos.X
+	} else if dS := dA - dM; dS > 0 {
+		dX := dS / 2
+		dY := dS - dX
+		if pos.X > pos.Y {
+			pos.X, pos.Y = pos.Y+dX+dY, pos.X-dX-dY
+		} else if pos.Y > pos.X {
+			pos.X, pos.Y = pos.Y-dY-dX, pos.X+dX+dY
+		}
+	}
+
+	return pos, nil
 }
 
 // Encode encodes a lat/lon/level into a Position
