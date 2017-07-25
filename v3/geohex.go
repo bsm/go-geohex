@@ -45,9 +45,8 @@ var (
 )
 
 const (
-	equatorLen = 40075016.686
-	deg2Rad    = math.Pi / 180.0
-	pio2       = math.Pi / 2
+	deg2Rad = math.Pi / 180.0
+	pio2    = math.Pi / 2
 )
 
 var (
@@ -74,7 +73,7 @@ func init() {
 	}
 
 	for level := 0; level <= MaxLevel; level++ {
-		size := math.Pow(3, float64(level+2)) / equatorLen
+		size := math.Pow(3, float64(level+2))
 		zooms[level] = zoom{size: size, wrap: pow3[level+2]}
 	}
 

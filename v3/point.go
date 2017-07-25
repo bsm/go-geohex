@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-// Point implements geographic Cartesian coordinates
+// Point implements geographic Cartesian coordinates of a Mercator projection to 1x1 square
 type Point struct {
 	E, N float64
 }

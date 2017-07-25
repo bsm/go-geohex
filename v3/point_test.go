@@ -14,10 +14,10 @@ var _ = Describe("Point", func() {
 	})
 
 	It("should create points", func() {
-		Expect(p1.E).To(BeNumerically("~", 19919568.3, 0.1))
-		Expect(p1.N).To(BeNumerically("~", -304192.7, 0.1))
-		Expect(p2.E).To(BeNumerically("~", 19244476.4, 0.1))
-		Expect(p2.N).To(BeNumerically("~", 17189491.4, 0.1))
+		Expect(p1.E).To(BeNumerically("~", 0.4971, 0.0001))
+		Expect(p1.N).To(BeNumerically("~", -0.0076, 0.0001))
+		Expect(p2.E).To(BeNumerically("~", 0.4802, 0.0001))
+		Expect(p2.N).To(BeNumerically("~", 0.4289, 0.0001))
 	})
 })
 

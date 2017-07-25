@@ -23,8 +23,8 @@ func NewLL(lat, lon float64) LL {
 // Point generates a grid point from a lat/lon
 func (ll LL) Point() Point {
 	return Point{
-		E: ll.Lon * equatorLen / 360.0,
-		N: math.Log(math.Tan((ll.Lat*deg2Rad+pio2)/2)) * equatorLen / math.Pi / 2,
+		E: ll.Lon / 360.0,
+		N: math.Log(math.Tan((ll.Lat*deg2Rad+pio2)/2)) / math.Pi / 2,
 	}
 }
 

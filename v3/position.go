@@ -35,7 +35,7 @@ func (p Position) LL() LL {
 	}
 
 	c := p.Centroid()
-	lat := (2*math.Atan(math.Exp(360*c.N/equatorLen*deg2Rad)) - pio2) / deg2Rad
+	lat := (2*math.Atan(math.Exp(360*c.N*deg2Rad)) - pio2) / deg2Rad
 
 	var lon float64
 	// p.Y - p.X == z.wrap means that we are on the westmost border.
@@ -43,7 +43,7 @@ func (p Position) LL() LL {
 	if p.Y-p.X == z.wrap {
 		lon = -180
 	} else {
-		lon = 360 * c.E / equatorLen
+		lon = 360 * c.E
 	}
 
 	return NewLL(lat, lon)
