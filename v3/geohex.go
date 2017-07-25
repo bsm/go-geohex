@@ -19,19 +19,18 @@ var (
 // Encode encodes a lat/lon/level into a code.
 // Can return an ErrLevelInvalid code if level is not valid.
 func Encode(lat, lon float64, level int) (string, error) {
-	pnt := NewLL(lat, lon).Point()  // Point at lat/lon
-	pos, err := pnt.Position(level) // Tile position
+	tile, err := newLL(lat, lon).tile(level)
 	if err != nil {
 		return "", err
 	}
 
-	return pos.Code(), nil
+	return tile.Code(), nil
 }
 
 // Decode decodes a string code into Lat/Lon coordinates
 // Can return ErrCodeInvalid if code is  not valid
 func Decode(code string) (LL, error) {
-	pos, err := DecodePosition(code)
+	pos, err := DecodeTile(code)
 	if err != nil {
 		return LL{}, err
 	}
@@ -57,8 +56,8 @@ var (
 	pow3     [MaxLevel + 3]int
 	halfPow3 [MaxLevel + 3]int
 
-	// Cached zooms lookup
-	zooms [MaxLevel + 1]*zoom
+	// Cached sizes
+	sizes [MaxLevel + 1]int
 )
 
 // zoom is a helper for level dimensions
@@ -66,7 +65,7 @@ type zoom struct {
 	size int
 }
 
-// Init zooms
+// Init sizes
 func init() {
 	for i := 0; i < MaxLevel+3; i++ {
 		pow := math.Pow(3, float64(i))
@@ -75,7 +74,7 @@ func init() {
 	}
 
 	for level := 0; level <= MaxLevel; level++ {
-		zooms[level] = &zoom{size: pow3[level+2]}
+		sizes[level] = pow3[level+2]
 	}
 
 	for i, b := range hChars {

@@ -29,7 +29,7 @@ type (
 
 	code2PositionTestCase struct {
 		code             string
-		expectedPosition Position
+		expectedPosition Tile
 	}
 
 	position2hexTestCase struct {

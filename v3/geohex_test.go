@@ -68,26 +68,26 @@ func benchmarkDecode(b *testing.B, level int) {
 	}
 }
 
-func BenchmarkDecodePositionLevel2(b *testing.B) {
-	benchmarkDecodePosition(b, 2)
+func BenchmarkDecodeTileLevel2(b *testing.B) {
+	benchmarkDecodeTile(b, 2)
 }
 
-func BenchmarkDecodePositionLevel6(b *testing.B) {
-	benchmarkDecodePosition(b, 6)
+func BenchmarkDecodeTileLevel6(b *testing.B) {
+	benchmarkDecodeTile(b, 6)
 }
 
-func BenchmarkDecodePositionLevel15(b *testing.B) {
-	benchmarkDecodePosition(b, 15)
+func BenchmarkDecodeTileLevel15(b *testing.B) {
+	benchmarkDecodeTile(b, 15)
 }
 
-func benchmarkDecodePosition(b *testing.B, level int) {
+func benchmarkDecodeTile(b *testing.B, level int) {
 	codes := [testItems]string{}
 	for i := 0; i < testItems; i++ {
 		codes[i], _ = Encode(points[i][0], points[i][1], level)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i += 1 {
-		DecodePosition(codes[i%testItems])
+		DecodeTile(codes[i%testItems])
 	}
 }
 

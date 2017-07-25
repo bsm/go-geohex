@@ -10,8 +10,8 @@ type LL struct {
 	Lat, Lon float64
 }
 
-// NewLL creates a new normalised LL
-func NewLL(lat, lon float64) LL {
+// newLL creates a new normalised LL
+func newLL(lat, lon float64) LL {
 	if lon < -180 {
 		lon += 360
 	} else if lon >= 180 {
@@ -20,12 +20,41 @@ func NewLL(lat, lon float64) LL {
 	return LL{Lat: lat, Lon: lon}
 }
 
-// Point generates a grid point from a lat/lon
-func (ll LL) Point() Point {
-	return Point{
-		E: ll.Lon / 360.0,
-		N: math.Log(math.Tan((ll.Lat*deg2Rad+pio2)/2)) / math.Pi / 2,
+// point generates a grid point from a lat/lon
+func (ll LL) tile(level int) (Tile, error) {
+
+	if level < 0 || level > MaxLevel {
+		return Tile{}, ErrLevelInvalid
 	}
+	size := sizes[level]
+
+	e := ll.Lon / 360.0
+	n := math.Log(math.Tan((ll.Lat*deg2Rad+pio2)/2)) / math.Pi / 2
+
+	x := (n/hK + e) * float64(size)
+	y := (n/hK - e) * float64(size)
+
+	x0, y0 := math.Floor(x), math.Floor(y)
+	xd, yd := x-x0, y-y0
+
+	tile := Tile{Level: level}
+	if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
+		tile.X, tile.Y = int(x0)+1, int(y0)+1
+	} else if yd <= -xd+1 && yd > 2*xd-1 && yd < 0.5*xd+0.5 {
+		tile.X, tile.Y = int(x0), int(y0)
+	} else if yd > xd {
+		tile.X, tile.Y = int(x0), int(y0)+1
+	} else {
+		tile.X, tile.Y = int(x0)+1, int(y0)
+	}
+
+	// tile.X-tile.Y == size means that we've wrapped through the eastmost border
+	// For example, there's no x=0,y=-9 tile on level 0, that's x=-9,y=0
+	if tile.X-tile.Y == size {
+		tile.X, tile.Y = tile.Y, tile.X
+	}
+
+	return tile, nil
 }
 
 // String returns a string representation of this coordinates

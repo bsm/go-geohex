@@ -6,59 +6,48 @@ import (
 	"strconv"
 )
 
-// Position implements a grid tile position
-type Position struct {
+// Tile implements a grid tile tile
+type Tile struct {
 	X, Y, Level int
 }
 
-// Centroid returns the centroid point of the tile
-func (p Position) Centroid() Point {
-	if p.Level < 0 || p.Level > MaxLevel {
-		return Point{}
-	}
-	z := zooms[p.Level]
-
-	hX := float64(p.X) / 2
-	hY := float64(p.Y) / 2
-
-	return Point{
-		E: (hX - hY) / float64(z.size),
-		N: (hX + hY) / float64(z.size) * hK,
-	}
-}
-
-// LL converts the position into a LL
-func (p Position) LL() LL {
-	if p.Level < 0 || p.Level > MaxLevel {
+// LL converts the tile into a LL
+func (t Tile) LL() LL {
+	if t.Level < 0 || t.Level > MaxLevel {
 		return LL{}
 	}
-	z := zooms[p.Level]
+	size := sizes[t.Level]
 
-	c := p.Centroid()
-	lat := (2*math.Atan(math.Exp(360*c.N*deg2Rad)) - pio2) / deg2Rad
+	hX := float64(t.X) / 2
+	hY := float64(t.Y) / 2
+
+	e := (hX - hY) / float64(size)
+	n := (hX + hY) / float64(size) * hK
+
+	lat := (2*math.Atan(math.Exp(360*n*deg2Rad)) - pio2) / deg2Rad
 
 	var lon float64
-	// p.Y - p.X == z.wrap means that we are on the westmost border.
+	// t.Y - t.X == size means that we are on the westmost border.
 	// We have some precision errors here and we often calculate those as -179.99999... , so just fix that
-	if p.Y-p.X == z.size {
+	if t.Y-t.X == size {
 		lon = -180
 	} else {
-		lon = 360 * c.E
+		lon = 360 * e
 	}
 
-	return NewLL(lat, lon)
+	return newLL(lat, lon)
 }
 
-// Code returns string Code of this position
-func (p Position) Code() string {
-	x, y := p.X, p.Y
+// Code returns string Code of this tile
+func (t Tile) Code() string {
+	x, y := t.X, t.Y
 	bx, by, base := make([]int, 3), make([]int, 3), 0
 	c3x, c3y := 0, 0
-	code := make([]byte, p.Level+2)
+	code := make([]byte, t.Level+2)
 
-	for i := 0; i < p.Level+3; i++ {
-		pow := pow3[p.Level+2-i]
-		p2c := halfPow3[p.Level+2-i]
+	for i := 0; i < t.Level+3; i++ {
+		pow := pow3[t.Level+2-i]
+		p2c := halfPow3[t.Level+2-i]
 
 		if x >= p2c {
 			x -= pow
@@ -91,7 +80,7 @@ func (p Position) Code() string {
 	// y <= x is the same condition as
 	//  centroid.Lon >= 0 || centroid.Lon == -180
 	// in the original library code. Without this, we'd generate other first two characters.
-	// They would still be correctly decoded to the same position though
+	// They would still be correctly decoded to the same tile though
 	if y <= x {
 		if bx[1] == by[1] && bx[2] == by[2] {
 			if (bx[0] == 2 && by[0] == 1) || (bx[0] == 1 && by[0] == 0) {
@@ -108,16 +97,15 @@ func (p Position) Code() string {
 	return string(code)
 }
 
-// DecodePosition decodes a string code into a Position,
+// DecodeTile decodes a string code into a Tile,
 // useful for further operations without having to decode it into a Lat/Lon, like calculating neighbours
-func DecodePosition(code string) (*Position, error) {
+func DecodeTile(code string) (Tile, error) {
 	lnc := len(code)
 	level := lnc - 2
 
 	if level < 0 || level > MaxLevel {
-		return nil, ErrCodeInvalid
+		return Tile{}, ErrCodeInvalid
 	}
-	z := zooms[level]
 
 	var (
 		n1, n2 int
@@ -125,9 +113,9 @@ func DecodePosition(code string) (*Position, error) {
 	)
 
 	if n1, ok = hIndex[code[0]]; !ok {
-		return nil, ErrCodeInvalid
+		return Tile{}, ErrCodeInvalid
 	} else if n2, ok = hIndex[code[1]]; !ok {
-		return nil, ErrCodeInvalid
+		return Tile{}, ErrCodeInvalid
 	}
 
 	base := n1*30 + n2
@@ -141,7 +129,7 @@ func DecodePosition(code string) (*Position, error) {
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
-			return nil, ErrCodeInvalid
+			return Tile{}, ErrCodeInvalid
 		}
 
 		pow := pow3[lnc-i]
@@ -161,7 +149,7 @@ func DecodePosition(code string) (*Position, error) {
 		}
 	}
 
-	overflow := y - x - z.size
+	overflow := y - x - sizes[level]
 	if overflow > 0 {
 		if x > y {
 			x, y = y+overflow, x-overflow
@@ -170,10 +158,10 @@ func DecodePosition(code string) (*Position, error) {
 		}
 	}
 
-	return &Position{X: x, Y: y, Level: level}, nil
+	return Tile{X: x, Y: y, Level: level}, nil
 }
 
-// String returns a String representation of this position
-func (p Position) String() string {
-	return fmt.Sprintf("[%d, %d]@%d", p.X, p.Y, p.Level)
+// String returns a String representation of this tile
+func (t Tile) String() string {
+	return fmt.Sprintf("[%d, %d]@%d", t.X, t.Y, t.Level)
 }
