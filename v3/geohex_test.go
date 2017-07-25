@@ -117,8 +117,16 @@ var _ = Describe("Decode LatLon from Code", func() {
 
 })
 
-var _ = Describe("zoom", func() {
-	It("should preload zooms", func() {
-		Expect(zooms).To(HaveLen(21))
+var _ = Describe("Valid levels", func() {
+
+	It("Should encode with level 0", func() {
+		_, err := Encode(0, 0, 0)
+		Expect(err).To(BeNil())
 	})
+
+	It("Should encode with level MaxLevel", func() {
+		_, err := Encode(0, 0, MaxLevel)
+		Expect(err).To(BeNil())
+	})
+
 })

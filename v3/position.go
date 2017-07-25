@@ -13,26 +13,26 @@ type Position struct {
 
 // Centroid returns the centroid point of the tile
 func (p Position) Centroid() Point {
-	z, ok := zooms[p.Level]
-	if !ok {
-		return Point{} // avoid dividing by zero later
+	if p.Level < 0 || p.Level > MaxLevel {
+		return Point{}
 	}
+	z := zooms[p.Level]
 
 	hX := float64(p.X) / 2
 	hY := float64(p.Y) / 2
 
 	return Point{
-		E: (hX - hY) / z.size,
-		N: (hX + hY) / z.size * hK,
+		E: (hX - hY) / float64(z.size),
+		N: (hX + hY) / float64(z.size) * hK,
 	}
 }
 
 // LL converts the position into a LL
 func (p Position) LL() LL {
-	z, ok := zooms[p.Level]
-	if !ok {
+	if p.Level < 0 || p.Level > MaxLevel {
 		return LL{}
 	}
+	z := zooms[p.Level]
 
 	c := p.Centroid()
 	lat := (2*math.Atan(math.Exp(360*c.N*deg2Rad)) - pio2) / deg2Rad
@@ -40,7 +40,7 @@ func (p Position) LL() LL {
 	var lon float64
 	// p.Y - p.X == z.wrap means that we are on the westmost border.
 	// We have some precision errors here and we often calculate those as -179.99999... , so just fix that
-	if p.Y-p.X == z.wrap {
+	if p.Y-p.X == z.size {
 		lon = -180
 	} else {
 		lon = 360 * c.E
@@ -113,12 +113,17 @@ func (p Position) Code() string {
 func DecodePosition(code string) (*Position, error) {
 	lnc := len(code)
 	level := lnc - 2
-	z, ok := zooms[level]
-	if !ok {
+
+	if level < 0 || level > MaxLevel {
 		return nil, ErrCodeInvalid
 	}
+	z := zooms[level]
 
-	var n1, n2 int
+	var (
+		n1, n2 int
+		ok     bool
+	)
+
 	if n1, ok = hIndex[code[0]]; !ok {
 		return nil, ErrCodeInvalid
 	} else if n2, ok = hIndex[code[1]]; !ok {
@@ -156,7 +161,7 @@ func DecodePosition(code string) (*Position, error) {
 		}
 	}
 
-	overflow := y - x - z.wrap
+	overflow := y - x - z.size
 	if overflow > 0 {
 		if x > y {
 			x, y = y+overflow, x-overflow

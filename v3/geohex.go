@@ -57,12 +57,11 @@ var (
 
 // zoom is a helper for level dimensions
 type zoom struct {
-	size float64
-	wrap int
+	size int
 }
 
 // Cached zooms lookup
-var zooms = make(map[int]zoom, 20)
+var zooms [MaxLevel + 1]*zoom
 
 // Init zooms
 func init() {
@@ -74,7 +73,7 @@ func init() {
 
 	for level := 0; level <= MaxLevel; level++ {
 		size := math.Pow(3, float64(level+2))
-		zooms[level] = zoom{size: size, wrap: pow3[level+2]}
+		zooms[level] = &zoom{size: int(size)}
 	}
 
 	for i, b := range hChars {
