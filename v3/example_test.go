@@ -3,7 +3,7 @@ package geohex_test
 import (
 	"fmt"
 
-	geohex "github.com/bsm/go-geohex/v3"
+	geohex "github.com/cabify/go-geohex/v3"
 )
 
 func ExampleEncode() {
@@ -19,5 +19,5 @@ func ExampleDecode() {
 	fmt.Println(ll.Lat, ll.Lon)
 
 	// Output:
-	// 35.63992106908978 139.7256515775034
+	// 35.63992106908978 139.72565157750344
 }
