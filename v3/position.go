@@ -13,9 +13,9 @@ type Position struct {
 
 // Centroid returns the centroid point of the tile
 func (p Position) Centroid() Point {
-	z, err := getZoom(p.Level)
-	if err != nil {
-		return Point{}
+	z, ok := zooms[p.Level]
+	if !ok {
+		return Point{} // avoid dividing by zero later
 	}
 
 	hX := float64(p.X) / 2
@@ -29,8 +29,8 @@ func (p Position) Centroid() Point {
 
 // LL converts the position into a LL
 func (p Position) LL() LL {
-	z, err := getZoom(p.Level)
-	if err != nil {
+	z, ok := zooms[p.Level]
+	if !ok {
 		return LL{}
 	}
 
@@ -113,7 +113,7 @@ func (p Position) Code() string {
 func DecodePosition(code string) (*Position, error) {
 	lnc := len(code)
 	level := lnc - 2
-	_, ok := zooms[level]
+	z, ok := zooms[level]
 	if !ok {
 		return nil, ErrCodeInvalid
 	}
@@ -132,7 +132,7 @@ func DecodePosition(code string) (*Position, error) {
 		code = strconv.Itoa(base) + code[2:]
 	}
 
-	pos := &Position{Level: level}
+	var x, y int
 	for i, digit := range code {
 		n := int64(digit - '0')
 		if n < 0 || n > 9 {
@@ -144,18 +144,28 @@ func DecodePosition(code string) (*Position, error) {
 		c3y := n % 3
 		switch c3x {
 		case 0:
-			pos.X -= pow
+			x -= pow
 		case 2:
-			pos.X += pow
+			x += pow
 		}
 		switch c3y {
 		case 0:
-			pos.Y -= pow
+			y -= pow
 		case 2:
-			pos.Y += pow
+			y += pow
 		}
 	}
-	return pos, nil
+
+	overflow := y - x - z.wrap
+	if overflow > 0 {
+		if x > y {
+			x, y = y+overflow, x-overflow
+		} else if x < y {
+			x, y = y-overflow, x+overflow
+		}
+	}
+
+	return &Position{X: x, Y: y, Level: level}, nil
 }
 
 // String returns a String representation of this position

@@ -52,8 +52,8 @@ const (
 
 var (
 	// Precalculated math stuff
-	pow3     [MaxLevel + 4]int
-	halfPow3 [MaxLevel + 4]int
+	pow3     [MaxLevel + 3]int
+	halfPow3 [MaxLevel + 3]int
 )
 
 // zoom is a helper for level dimensions
@@ -62,20 +62,12 @@ type zoom struct {
 	wrap int
 }
 
-func getZoom(level int) (*zoom, error) {
-	z, ok := zooms[level]
-	if !ok {
-		return nil, ErrLevelInvalid
-	}
-	return z, nil
-}
-
 // Cached zooms lookup
-var zooms = make(map[int]*zoom, 20)
+var zooms = make(map[int]zoom, 20)
 
 // Init zooms
 func init() {
-	for i := 0; i < MaxLevel+4; i++ {
+	for i := 0; i < MaxLevel+3; i++ {
 		pow := math.Pow(3, float64(i))
 		pow3[i] = int(pow)
 		halfPow3[i] = int(math.Ceil(pow / 2))
@@ -83,7 +75,7 @@ func init() {
 
 	for level := 0; level <= MaxLevel; level++ {
 		size := math.Pow(3, float64(level+2)) / equatorLen
-		zooms[level] = &zoom{size: size, wrap: pow3[level+2]}
+		zooms[level] = zoom{size: size, wrap: pow3[level+2]}
 	}
 
 	for i, b := range hChars {

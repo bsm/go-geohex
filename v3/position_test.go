@@ -29,7 +29,7 @@ var _ = Describe("Position", func() {
 var _ = Describe("Decode Position from Code", func() {
 
 	for _, tc := range loadCode2PositionTestCases() {
-		tc := &tc
+		tc := tc
 		It(fmt.Sprintf("should decode position [%d, %d] from %s", tc.expectedPosition.X, tc.expectedPosition.Y, tc.code), func() {
 			act, err := DecodePosition(tc.code)
 			Expect(err).To(BeNil())

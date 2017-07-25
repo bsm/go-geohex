@@ -11,9 +11,9 @@ type Point struct {
 
 // Position returns the X/Y grid position of the Point
 func (p Point) Position(level int) (Position, error) {
-	z, err := getZoom(level)
-	if err != nil {
-		return Position{}, err
+	z, ok := zooms[level]
+	if !ok {
+		return Position{}, ErrLevelInvalid
 	}
 
 	x := (p.N/hK + p.E) * z.size
