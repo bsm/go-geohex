@@ -112,10 +112,11 @@ func (p Position) LL() LL {
 // Code returns string Code of this position
 func (p Position) Code() string {
 	x, y := p.X, p.Y
-	bx, by, base := make([]uint8, 3), make([]uint8, 3), 0
-	code := make([]byte, p.Level+2)
 
+	var code [22]byte
+	var bx, by [3]uint8
 	var c3x, c3y uint8
+
 	for i := uint8(0); i < p.Level+3; i++ {
 		n := int(p.Level + 2 - i)
 		pow := pow3[n]
@@ -161,10 +162,8 @@ func (p Position) Code() string {
 		}
 	}
 
-	base = 3*(100*int(bx[0])+10*int(bx[1])+int(bx[2])) + (100*int(by[0]) + 10*int(by[1]) + int(by[2]))
-
+	base := 3*(100*int(bx[0])+10*int(bx[1])+int(bx[2])) + (100*int(by[0]) + 10*int(by[1]) + int(by[2]))
 	code[0] = hChars[base/30]
 	code[1] = hChars[base%30]
-
-	return string(code)
+	return string(code[:p.Level+2])
 }

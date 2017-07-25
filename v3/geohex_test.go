@@ -8,75 +8,6 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestSuite(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "geohex")
-}
-
-// --------------------------------------------------------------------
-
-const benchItems = 30
-
-var (
-	points   [benchItems][2]float64
-	geohex2  [benchItems]string
-	geohex6  [benchItems]string
-	geohex15 [benchItems]string
-)
-
-func init() {
-	rnd := rand.New(rand.NewSource(0))
-
-	for i := 0; i < benchItems; i++ {
-		points[i] = [2]float64{rnd.Float64()*180 - 90, rnd.Float64()*360 - 180}
-		pos2, _ := Encode(points[i][0], points[i][1], 2)
-		geohex2[i] = pos2.Code()
-		pos6, _ := Encode(points[i][0], points[i][1], 6)
-		geohex6[i] = pos6.Code()
-		pos15, _ := Encode(points[i][0], points[i][1], 15)
-		geohex15[i] = pos15.Code()
-	}
-}
-
-func BenchmarkEncodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%benchItems]
-		Encode(p[0], p[1], 2)
-	}
-}
-
-func BenchmarkEncodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%benchItems]
-		Encode(p[0], p[1], 6)
-	}
-}
-
-func BenchmarkEncodeLevel15(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		p := points[i%benchItems]
-		Encode(p[0], p[1], 15)
-	}
-}
-
-func BenchmarkDecodeLevel2(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex2[i%benchItems])
-	}
-}
-
-func BenchmarkDecodeLevel6(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex6[i%benchItems])
-	}
-}
-
-func BenchmarkDecodeLevel15(b *testing.B) {
-	for i := 0; i < b.N; i += 1 {
-		Decode(geohex15[i%benchItems])
-	}
-}
-
 var _ = Describe("zoom", func() {
 
 	It("should preload zooms", func() {
@@ -91,3 +22,78 @@ var _ = Describe("zoom", func() {
 		Expect(zoom.h).To(BeNumerically("~", 1175.498, 0.001))
 	})
 })
+
+func TestSuite(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "geohex")
+}
+
+// --------------------------------------------------------------------
+
+func BenchmarkEncode(b *testing.B) {
+	seeds := benchmarkSeedLL(300)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ll := seeds[i%len(seeds)]
+		if _, err := Encode(ll.Lat, ll.Lon, 15); err != nil {
+			b.Fatalf("expected no error but got: %v", err)
+		}
+	}
+}
+
+func BenchmarkDecode(b *testing.B) {
+	seeds, err := benchmarkSeedPos(300)
+	if err != nil {
+		b.Fatalf("expected no error but got: %v", err)
+	}
+
+	codes := make([]string, 0)
+	for _, pos := range seeds {
+		codes = append(codes, pos.Code())
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		if _, err := Decode(codes[i%len(codes)]); err != nil {
+			b.Fatalf("expected no error but got: %v", err)
+		}
+	}
+}
+
+func BenchmarkPosition_Code(b *testing.B) {
+	seeds, err := benchmarkSeedPos(300)
+	if err != nil {
+		b.Fatalf("expected no error but got: %v", err)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		pos := seeds[i%len(seeds)]
+		pos.Code()
+	}
+}
+
+func benchmarkSeedLL(n int) []LL {
+	rnd := rand.New(rand.NewSource(0))
+	lls := make([]LL, 0)
+	for i := 0; i < n; i++ {
+		lls = append(lls, LL{
+			Lat: rnd.Float64()*180 - 90,
+			Lon: rnd.Float64()*360 - 180,
+		})
+	}
+	return lls
+}
+
+func benchmarkSeedPos(n int) ([]Position, error) {
+	res := make([]Position, 0)
+	for _, ll := range benchmarkSeedLL(n) {
+		pos, err := Encode(ll.Lat, ll.Lon, 15)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, pos)
+	}
+	return res, nil
+}
