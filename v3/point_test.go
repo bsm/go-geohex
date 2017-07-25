@@ -6,7 +6,7 @@ import (
 )
 
 var _ = Describe("Point", func() {
-	var p1, p2 *Point
+	var p1, p2 Point
 
 	BeforeEach(func() {
 		p1 = NewLL(-2.7315738409448347, 178.9405262207031).Point()
@@ -19,16 +19,15 @@ var _ = Describe("Point", func() {
 		Expect(p2.E).To(BeNumerically("~", 19244476.4, 0.1))
 		Expect(p2.N).To(BeNumerically("~", 17189491.4, 0.1))
 	})
+})
 
-	It("should export grid positions", func() {
-		pos := p1.Position(zooms[0])
-		Expect(pos.X).To(Equal(4))
-		Expect(pos.Y).To(Equal(-5))
-		Expect(pos.z.level).To(Equal(0))
-
-		pos = p2.Position(zooms[0])
-		Expect(pos.X).To(Equal(11))
-		Expect(pos.Y).To(Equal(2))
-		Expect(pos.z.level).To(Equal(0))
-	})
+var _ = Describe("Point to position", func() {
+	for _, tc := range loadLL2PositionTestCases() {
+		tc := tc
+		It("should create position from "+tc.ll.String(), func() {
+			pos := tc.ll.Point().Position(zooms[tc.level])
+			Expect(pos.X).To(Equal(tc.expectedX))
+			Expect(pos.Y).To(Equal(tc.expectedY))
+		})
+	}
 })

@@ -104,7 +104,7 @@ var _ = Describe("LL", func() {
 
 	It("should create points", func() {
 		pt := NewLL(66.68, -87.98).Point()
-		Expect(pt).To(BeAssignableToTypeOf(&Point{}))
+		Expect(pt).To(BeAssignableToTypeOf(Point{}))
 	})
 
 })
