@@ -8,10 +8,42 @@ import (
 
 // Test cases downloaded from http://geohex.net/testcase/v3.2.html
 
-type code2LLTestCase struct {
-	code       string
-	expectedLL LL
-}
+type (
+	code2LLTestCase struct {
+		code       string
+		expectedLL LL
+	}
+
+	ll2codeTestCase struct {
+		level        int
+		ll           LL
+		expectedCode string
+	}
+
+	ll2PositionTestCase struct {
+		level     int
+		ll        LL
+		expectedX int
+		expectedY int
+	}
+
+	code2PositionTestCase struct {
+		code             string
+		expectedPosition Position
+	}
+
+	position2hexTestCase struct {
+		level        int
+		x            int
+		y            int
+		expectedCode string
+	}
+
+	tcFieldMapping struct {
+		f json.RawMessage
+		v interface{}
+	}
+)
 
 func loadCode2LLTestCases() []code2LLTestCase {
 	var tcs []code2LLTestCase
@@ -29,12 +61,6 @@ func loadCode2LLTestCases() []code2LLTestCase {
 	return tcs
 }
 
-type ll2codeTestCase struct {
-	level        int
-	ll           LL
-	expectedCode string
-}
-
 func loadLL2CodeTestCases() []ll2codeTestCase {
 	var tcs []ll2codeTestCase
 	// http://geohex.net/testcase/hex_v3.2_test_coord2HEX.json
@@ -50,13 +76,6 @@ func loadLL2CodeTestCases() []ll2codeTestCase {
 		return err
 	})
 	return tcs
-}
-
-type ll2PositionTestCase struct {
-	level     int
-	ll        LL
-	expectedX int
-	expectedY int
 }
 
 func loadLL2PositionTestCases() []ll2PositionTestCase {
@@ -77,11 +96,6 @@ func loadLL2PositionTestCases() []ll2PositionTestCase {
 	return tcs
 }
 
-type code2PositionTestCase struct {
-	code             string
-	expectedPosition Position
-}
-
 func loadCode2PositionTestCases() []code2PositionTestCase {
 	var tcs []code2PositionTestCase
 	// http://geohex.net/testcase/hex_v3.2_test_code2XY.json
@@ -96,13 +110,6 @@ func loadCode2PositionTestCases() []code2PositionTestCase {
 		return err
 	})
 	return tcs
-}
-
-type position2hexTestCase struct {
-	level        int
-	x            int
-	y            int
-	expectedCode string
 }
 
 func loadPosition2HexTestCases() []position2hexTestCase {
@@ -120,11 +127,6 @@ func loadPosition2HexTestCases() []position2hexTestCase {
 		return err
 	})
 	return tcs
-}
-
-type tcFieldMapping struct {
-	f json.RawMessage
-	v interface{}
 }
 
 func unmarshalRawFields(fields []tcFieldMapping) error {
