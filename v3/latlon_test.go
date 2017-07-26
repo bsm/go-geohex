@@ -17,11 +17,6 @@ var _ = Describe("LL", func() {
 		Expect(ll2.Lon).To(Equal(10.5))
 	})
 
-	It("should create points", func() {
-		pt := NewLL(66.68, -87.98).Point()
-		Expect(pt).To(BeAssignableToTypeOf(Point{}))
-	})
-
 	It("should decode", func() {
 		for _, tc := range testCasesCode2HEX {
 			pos, err := Decode(tc.code)
@@ -43,4 +38,9 @@ var _ = Describe("LL", func() {
 		}
 	})
 
+	It("should create positions", func() {
+		for _, tc := range testCasesCoord2XY {
+			Expect(tc.ll.Position(tc.level)).To(Equal(tc.exp), "for %#v", tc)
+		}
+	})
 })

@@ -8,17 +8,45 @@ GeoHex implementation in Go
 
 ## Quick Start
 
-    import (
-      geohex "github.com/bsm/geohex/v3"
-    )
+```go
+import (
+	"fmt"
 
-    func main() {
-      geohex.Encode(35.647401, 139.716911, 6)
-      // "XM488541"
+	geohex "github.com/cabify/go-geohex/v3"
+)
 
-      geohex.Decode("XM488541")
-      // &LL{Lat: 35.63992106909, Lon: 139.7256515775}
-    }
+func ExampleEncode() {
+	pos, _ := geohex.Encode(35.647401, 139.716911, 6)
+	fmt.Println(pos.Code())
+
+	// Output:
+	// XM488541
+}
+
+func ExampleDecode() {
+	pos, _ := geohex.Decode("XM488541")
+	ll := pos.LL()
+	fmt.Println(ll.Lat, ll.Lon)
+
+	// Output:
+	// 35.63992106908978 139.72565157750344
+}
+
+func ExampleNeighbours() {
+	pos, _ := geohex.Decode("XM488541")
+	for _, n := range pos.Neighbours() {
+		fmt.Println(n.Code())
+	}
+
+	// Output:
+	// XM488545
+	// XM488516
+	// XM488544
+	// XM488517
+	// XM488542
+	// XM488540
+}
+```
 
 ## Running tests
 
@@ -37,9 +65,6 @@ To run benchmarks, call:
 
 ## Latest benchmarks
 
-    BenchmarkEncodeLevel2-4   3000000  477 ns/op  120 B/op  6 allocs/op
-    BenchmarkEncodeLevel6-4   3000000  515 ns/op  128 B/op  6 allocs/op
-    BenchmarkEncodeLevel15-4  2000000  595 ns/op  176 B/op  6 allocs/op
-    BenchmarkDecodeLevel2-4   5000000  374 ns/op   72 B/op  4 allocs/op
-    BenchmarkDecodeLevel6-4   3000000  403 ns/op   80 B/op  4 allocs/op
-    BenchmarkDecodeLevel15-4  3000000  455 ns/op   99 B/op  4 allocs/op
+    BenchmarkEncode-4        10000000   191 ns/op   0 B/op   0 allocs/op
+    BenchmarkDecode-4         3000000   478 ns/op   3 B/op   1 allocs/op
+    BenchmarkPosition_Code-4  5000000   328 ns/op   32 B/op  1 allocs/op
