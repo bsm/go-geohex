@@ -8,18 +8,10 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("zoom", func() {
+var _ = Describe("Sizes", func() {
 
-	It("should preload zooms", func() {
-		Expect(zooms).To(HaveLen(21))
-	})
-
-	It("should calculate attributes", func() {
-		zoom := zooms[7]
-		Expect(zoom.size).To(BeNumerically("~", 339.337, 0.001))
-		Expect(zoom.scale).To(BeNumerically("~", 0.000053, 0.000001))
-		Expect(zoom.w).To(BeNumerically("~", 2036.022, 0.001))
-		Expect(zoom.h).To(BeNumerically("~", 1175.498, 0.001))
+	It("should preload sizes", func() {
+		Expect(sizes).To(HaveLen(21))
 	})
 })
 

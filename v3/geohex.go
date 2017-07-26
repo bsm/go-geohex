@@ -20,7 +20,6 @@ var (
 	hChars = []byte{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'}
 	hIndex = make(map[byte]int, len(hChars))
 	hK     = math.Tan(math.Pi / 6.0)
-	hD2R   = math.Pi / 180.0
 
 	// Precalculated math stuff
 	pow3     [MaxLevel + 3]int
@@ -28,20 +27,12 @@ var (
 )
 
 const (
-	hBase = 20037508.34
-	hEr   = 6371007.2
+	deg2Rad = math.Pi / 180.0
+	pio2    = math.Pi / 2
 )
 
-// zoom is a helper for level dimensions
-type zoom struct {
-	size  float64
-	scale float64
-	w     float64
-	h     float64
-}
-
 // Cached zooms lookup
-var zooms = make(map[uint8]zoom, 20)
+var sizes = make(map[uint8]int, 20)
 
 // Init cache
 func init() {
@@ -56,7 +47,6 @@ func init() {
 	}
 
 	for level := uint8(0); level <= MaxLevel; level++ {
-		size := hBase / math.Pow(3, float64(level+3))
-		zooms[level] = zoom{size: size, scale: size / hEr, w: 6 * size, h: 6 * size * hK}
+		sizes[level] = pow3[level+2]
 	}
 }

@@ -20,5 +20,20 @@ func ExampleDecode() {
 	fmt.Println(ll.Lat, ll.Lon)
 
 	// Output:
-	// 35.63992106908978 139.7256515775034
+	// 35.63992106908978 139.72565157750344
+}
+
+func ExamplePosition_Neighbours() {
+	pos, _ := geohex.Decode("XM488541")
+	for _, n := range pos.Neighbours() {
+		fmt.Println(n.Code())
+	}
+
+	// Output:
+	// XM488545
+	// XM488516
+	// XM488544
+	// XM488517
+	// XM488542
+	// XM488540
 }
