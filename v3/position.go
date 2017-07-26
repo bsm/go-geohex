@@ -25,18 +25,18 @@ func NewPosition(x, y int, level uint8) Position {
 // Decode decodes a string code into a Position.
 func Decode(code string) (Position, error) {
 	lnc := len(code)
-	level := uint8(lnc - 2)
+	pos := Position{Level: uint8(lnc - 2)}
 
-	size, ok := sizes[level]
+	size, ok := sizes[pos.Level]
 	if !ok {
-		return Position{}, ErrLevelInvalid
+		return pos, ErrLevelInvalid
 	}
 
 	var n1, n2 int
 	if n1, ok = hIndex[code[0]]; !ok {
-		return Position{}, ErrCodeInvalid
+		return pos, ErrCodeInvalid
 	} else if n2, ok = hIndex[code[1]]; !ok {
-		return Position{}, ErrCodeInvalid
+		return pos, ErrCodeInvalid
 	}
 
 	base := n1*30 + n2
@@ -46,38 +46,37 @@ func Decode(code string) (Position, error) {
 		code = strconv.Itoa(base) + code[2:]
 	}
 
-	var x, y int
 	for i, digit := range code {
 		n := uint8(digit - '0')
 		if n < 0 || n > 9 {
-			return Position{}, ErrCodeInvalid
+			return pos, ErrCodeInvalid
 		}
 
 		pow := pow3[lnc-i]
 		switch n / 3 {
 		case 0:
-			x -= pow
+			pos.X -= pow
 		case 2:
-			x += pow
+			pos.X += pow
 		}
 		switch n % 3 {
 		case 0:
-			y -= pow
+			pos.Y -= pow
 		case 2:
-			y += pow
+			pos.Y += pow
 		}
 	}
 
-	overflow := y - x - size
+	overflow := pos.Y - pos.X - size
 	if overflow > 0 {
-		if x > y {
-			x, y = y+overflow, x-overflow
-		} else if x < y {
-			x, y = y-overflow, x+overflow
+		if pos.X > pos.Y {
+			pos.X, pos.Y = pos.Y+overflow, pos.Y-overflow
+		} else if pos.X < pos.Y {
+			pos.X, pos.Y = pos.Y-overflow, pos.X+overflow
 		}
 	}
 
-	return Position{X: x, Y: y, Level: level}, nil
+	return pos, nil
 }
 
 // Encode encodes a lat/lon/level into a Position
