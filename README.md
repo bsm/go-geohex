@@ -83,6 +83,7 @@ we turn the axes 45 degrees and we stretch one of them by a factor of tan(pi/6),
 this makes each four adjacent hexagons centers' be equidistant. Then we decide
 which hexagon contains the desired coordinates. This is probably the trickiest part,
 we use this condition to decide:
+
 ```go
 if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
   x, y = int(x0)+1, int(y0)+1
@@ -94,6 +95,7 @@ if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
   x, y = int(x0)+1, int(y0)
 }
 ```
+
 Where `x0` and `y0` are the integer part of the `x`, `y` coordinates after changing
 the base and `xd`, `yd` are the decimal part of those. If we assume that both `x0` and
 `y0` are zero, you can see how those conditions define limit lines for each of
@@ -102,6 +104,7 @@ four hexagons on the next drawing, while our `x`, `y` point lays somewhere insid
 ![Hexagons on the 1x1 square](/doc/hexagons.png?raw=true)
 
 This way, previous condtions mean:
+
 ```go
 if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
   // red hexagon

@@ -23,7 +23,7 @@ func ExampleDecode() {
 	// 35.63992106908978 139.72565157750344
 }
 
-func ExampleNeighbours() {
+func Example_Neighbours() {
 	pos, _ := geohex.Decode("XM488541")
 	for _, n := range pos.Neighbours() {
 		fmt.Println(n.Code())
