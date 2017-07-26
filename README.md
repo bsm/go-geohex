@@ -94,7 +94,7 @@ if yd > -xd+1 && yd < 2*xd && yd > 0.5*xd {
   x, y = int(x0)+1, int(y0)
 }
 ```
-Where `x0` and 'x0' are the integer part of the `x`, `y` coordinates after changing
+Where `x0` and `y0` are the integer part of the `x`, `y` coordinates after changing
 the base and `xd`, `yd` are the decimal part of those. If we assume that both `x0` and
 `y0` are zero, you can see how those conditions define limit lines for each of
 four hexagons on the next drawing, while our `x`, `y` point lays somewhere inside of the square:
