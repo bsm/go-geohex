@@ -65,9 +65,9 @@ To run benchmarks, call:
 
 ## Latest benchmarks
 
-    BenchmarkEncode-4        10000000   191 ns/op   0 B/op   0 allocs/op
-    BenchmarkDecode-4         3000000   478 ns/op   3 B/op   1 allocs/op
-    BenchmarkPosition_Code-4  5000000   328 ns/op   32 B/op  1 allocs/op
+    BenchmarkEncode-4          10000000  190 ns/op   0 B/op   0 allocs/op
+    BenchmarkDecode-4          3000000   444 ns/op   3 B/op   1 allocs/op
+    BenchmarkPosition_Code-4   5000000   326 ns/op   32 B/op  1 allocs/op
 
 ## Encoding details
 
