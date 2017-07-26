@@ -12,7 +12,7 @@ GeoHex implementation in Go
 import (
 	"fmt"
 
-	geohex "github.com/cabify/go-geohex/v3"
+	geohex "github.com/bsm/go-geohex/v3"
 )
 
 func ExampleEncode() {
